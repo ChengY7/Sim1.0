@@ -4,14 +4,11 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"path/filepath"
 	"time"
 
 	"github.com/chengyang/sim1.0/backend/internal/config"
 	"github.com/chengyang/sim1.0/backend/internal/sim"
 )
-
-const maxPossSafety = 300
 
 func main() {
 	home := flag.String("home", "LAL", "home team id (see config/teams.json)")
@@ -20,12 +17,7 @@ func main() {
 	quiet := flag.Bool("quiet", false, "only print final line")
 	flag.Parse()
 
-	cfgDir := "config"
-	if _, err := os.Stat(cfgDir); os.IsNotExist(err) {
-		cfgDir = filepath.Join("backend", "config")
-	}
-
-	bundle, err := config.Load(cfgDir)
+	bundle, err := config.Load(config.Dir())
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "load config: %v\n", err)
 		os.Exit(1)
@@ -45,26 +37,19 @@ func main() {
 	g := bundle.Game
 	expected := int(g.ExpectedTotalPossessions())
 
-	state := engine.NewGame()
+	preview := engine.NewGame()
 	if !*quiet {
-		fmt.Printf("Sim1.0 — %s vs %s (seed %d)\n", state.HomeName, state.AwayName, s)
+		fmt.Printf("Sim1.0 — %s vs %s (seed %d)\n", preview.HomeName, preview.AwayName, s)
 		fmt.Printf("Pace %g → ~%d total possessions, ~%.1fs per possession\n\n",
 			g.Pace, expected, g.SecondsPerPossession())
 	}
 
-	for state.Status != "final" {
-		if state.Possession >= maxPossSafety {
-			fmt.Fprintf(os.Stderr, "safety stop at %d possessions\n", maxPossSafety)
-			break
-		}
-		ev := engine.Step(state)
-		if !*quiet {
+	result := engine.RunUntilFinal()
+	state := result.State
+
+	if !*quiet {
+		for _, ev := range result.Events {
 			fmt.Printf("P%03d  %s\n", ev.Possession, ev.Text)
-			if ev.Points > 0 {
-				fmt.Printf("       Score: %s %d — %d %s (Q%d %s)\n",
-					state.HomeName, state.HomeScore, state.AwayScore, state.AwayName,
-					state.Quarter, formatClock(state.ClockSec))
-			}
 		}
 	}
 

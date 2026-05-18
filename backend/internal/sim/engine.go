@@ -23,17 +23,17 @@ type Event struct {
 }
 
 type State struct {
-	HomeID    string
-	AwayID    string
-	HomeName  string
-	AwayName  string
-	HomeScore int
-	AwayScore int
-	Offense   Side
-	Possession int
-	Quarter   int
-	ClockSec  int
-	Status    string // in_progress | final
+	HomeID     string `json:"home_id"`
+	AwayID     string `json:"away_id"`
+	HomeName   string `json:"home_name"`
+	AwayName   string `json:"away_name"`
+	HomeScore  int    `json:"home_score"`
+	AwayScore  int    `json:"away_score"`
+	Offense    Side   `json:"offense"`
+	Possession int    `json:"possession"`
+	Quarter    int    `json:"quarter"`
+	ClockSec   int    `json:"clock_sec"`
+	Status     string `json:"status"` // in_progress | final
 }
 
 type Engine struct {

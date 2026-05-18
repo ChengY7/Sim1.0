@@ -4,12 +4,27 @@ Possession-by-possession simulator using **seeded randomness** and **JSON config
 
 ## Run
 
-From `backend/`:
+**CLI** (from `backend/`):
 
 ```bash
 go run ./cmd/sim -home LAL -away BOS -seed 42
 go run ./cmd/sim -home LAL -away BOS -seed 42 -quiet   # final line only
 ```
+
+**HTTP API**:
+
+```bash
+go run ./cmd/server
+curl -s http://localhost:8080/teams
+curl -s -X POST http://localhost:8080/simulate \
+  -H 'Content-Type: application/json' \
+  -d '{"home_team_id":"LAL","away_team_id":"BOS","seed":42}'
+```
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/teams` | All team ids from `teams.json` |
+| POST | `/simulate` | Run full game until clock ends; returns `state`, `events`, `seed` |
 
 ## Config
 
