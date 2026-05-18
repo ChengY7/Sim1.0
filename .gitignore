@@ -1,0 +1,10 @@
+# macOS
+.DS_Store
+
+# Go
+backend/bin/
+*.exe
+*.test
+
+# Env
+.env
