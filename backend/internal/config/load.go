@@ -3,9 +3,16 @@ package config
 import (
 	"encoding/json"
 	"fmt"
+	"io/fs"
 	"os"
-	"path/filepath"
+
+	_ "embed"
+
+	"embed"
 )
+
+//go:embed data
+var defaultFS embed.FS
 
 type Team struct {
 	ID      string  `json:"id"`
@@ -26,10 +33,10 @@ type OutcomesFile struct {
 
 // Game holds clock and pace. Pace = possessions per 48 min per team (NBA-style).
 type Game struct {
-	Quarters        int     `json:"quarters"`
-	QuarterSeconds  int     `json:"quarter_seconds"`
-	Pace            float64 `json:"pace"`
-	TickJitterSec   int     `json:"tick_jitter_sec"`
+	Quarters       int     `json:"quarters"`
+	QuarterSeconds int     `json:"quarter_seconds"`
+	Pace           float64 `json:"pace"`
+	TickJitterSec  int     `json:"tick_jitter_sec"`
 }
 
 func (g Game) GameSeconds() float64 {
@@ -52,12 +59,22 @@ type Bundle struct {
 	Game     Game
 }
 
-func Load(dir string) (*Bundle, error) {
-	teamsPath := filepath.Join(dir, "teams.json")
-	outcomesPath := filepath.Join(dir, "outcomes.json")
-	gamePath := filepath.Join(dir, "game.json")
+// Load returns a Bundle using the configs embedded at build time.
+func Load() (*Bundle, error) {
+	sub, err := fs.Sub(defaultFS, "data")
+	if err != nil {
+		return nil, err
+	}
+	return load(sub)
+}
 
-	teamsData, err := os.ReadFile(teamsPath)
+// LoadDir returns a Bundle from JSON files in dir, overriding the embedded defaults.
+func LoadDir(dir string) (*Bundle, error) {
+	return load(os.DirFS(dir))
+}
+
+func load(fsys fs.FS) (*Bundle, error) {
+	teamsData, err := fs.ReadFile(fsys, "teams.json")
 	if err != nil {
 		return nil, fmt.Errorf("read teams: %w", err)
 	}
@@ -66,7 +83,7 @@ func Load(dir string) (*Bundle, error) {
 		return nil, fmt.Errorf("parse teams: %w", err)
 	}
 
-	outcomesData, err := os.ReadFile(outcomesPath)
+	outcomesData, err := fs.ReadFile(fsys, "outcomes.json")
 	if err != nil {
 		return nil, fmt.Errorf("read outcomes: %w", err)
 	}
@@ -75,7 +92,7 @@ func Load(dir string) (*Bundle, error) {
 		return nil, fmt.Errorf("parse outcomes: %w", err)
 	}
 
-	gameData, err := os.ReadFile(gamePath)
+	gameData, err := fs.ReadFile(fsys, "game.json")
 	if err != nil {
 		return nil, fmt.Errorf("read game: %w", err)
 	}

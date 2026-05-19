@@ -17,7 +17,7 @@ func main() {
 	quiet := flag.Bool("quiet", false, "only print final line")
 	flag.Parse()
 
-	bundle, err := config.Load(config.Dir())
+	bundle, err := config.Load()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "load config: %v\n", err)
 		os.Exit(1)
