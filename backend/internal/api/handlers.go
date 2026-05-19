@@ -45,6 +45,7 @@ func (h *Handlers) ListTeams(w http.ResponseWriter, r *http.Request) {
 // @Failure      400   {object}  ErrorResponse
 // @Router       /simulate [post]
 func (h *Handlers) Simulate(w http.ResponseWriter, r *http.Request) {
+	r.Body = http.MaxBytesReader(w, r.Body, 4096)
 	var req SimulateRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		writeError(w, http.StatusBadRequest, "invalid JSON body")

@@ -112,6 +112,9 @@ func load(fsys fs.FS) (*Bundle, error) {
 
 	byID := make(map[string]Team, len(teams))
 	for _, t := range teams {
+		if t.Offense <= 0 || t.Defense <= 0 {
+			return nil, fmt.Errorf("team %q: offense and defense must be > 0", t.ID)
+		}
 		byID[t.ID] = t
 	}
 
