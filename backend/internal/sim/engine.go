@@ -16,6 +16,8 @@ const (
 
 type Event struct {
 	Possession int    `json:"possession"`
+	Period     string `json:"period"`
+	ClockSec   int    `json:"clock_sec"`
 	Team       Side   `json:"team"`
 	Type       string `json:"type"`
 	Points     int    `json:"points"`
@@ -92,6 +94,8 @@ func (e *Engine) Step(s *State) Event {
 	outcome := e.pickOutcome(mult)
 	ev := Event{
 		Possession: s.Possession,
+		Period:     PeriodLabel(s.Quarter, e.cfg.Game.Quarters),
+		ClockSec:   s.ClockSec,
 		Team:       s.Offense,
 		Type:       outcome.Type,
 		Points:     outcome.Points,
@@ -192,12 +196,12 @@ func (e *Engine) tickClock(s *State) {
 			s.Status = "final"
 			return
 		}
-		// advance to the next period
+		// advance to the next period (reset clock, no carry-over)
 		s.Quarter++
 		if s.Quarter > g.Quarters {
-			s.ClockSec += g.OTSeconds
+			s.ClockSec = g.OTSeconds
 		} else {
-			s.ClockSec += g.QuarterSeconds
+			s.ClockSec = g.QuarterSeconds
 		}
 	}
 }

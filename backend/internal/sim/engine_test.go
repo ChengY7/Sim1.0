@@ -167,7 +167,7 @@ func TestRunUntilFinal_Truncated(t *testing.T) {
 
 func TestRunUntilFinal_2OT(t *testing.T) {
 	b := loadBundle(t)
-	engine, _ := sim.NewEngine(b, "LAL", "BOS", 679)
+	engine, _ := sim.NewEngine(b, "LAL", "BOS", 241)
 	r := engine.RunUntilFinal()
 
 	if r.State.Quarter != b.Game.Quarters+2 {

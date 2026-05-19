@@ -132,7 +132,7 @@ func TestSimulate_OT(t *testing.T) {
 }
 
 func TestSimulate_2OT(t *testing.T) {
-	seed := int64(679)
+	seed := int64(241)
 	rec := simulate(t, api.SimulateRequest{HomeTeamID: "LAL", AwayTeamID: "BOS", Seed: &seed})
 
 	var resp api.SimulateResponse

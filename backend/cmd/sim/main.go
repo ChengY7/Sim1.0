@@ -57,7 +57,8 @@ func main() {
 
 	if !*quiet {
 		for _, ev := range result.Events {
-			fmt.Printf("P%03d  %-40s %d-%d\n", ev.Possession, ev.Text, ev.HomeScore, ev.AwayScore)
+			clock := fmt.Sprintf("%s %s", ev.Period, formatClock(ev.ClockSec))
+			fmt.Printf("P%03d  %-10s  %-40s %d-%d\n", ev.Possession, clock, ev.Text, ev.HomeScore, ev.AwayScore)
 		}
 	}
 
