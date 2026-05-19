@@ -33,10 +33,12 @@ type OutcomesFile struct {
 
 // Game holds clock and pace. Pace = possessions per 48 min per team (NBA-style).
 type Game struct {
-	Quarters       int     `json:"quarters"`
-	QuarterSeconds int     `json:"quarter_seconds"`
-	Pace           float64 `json:"pace"`
-	TickJitterSec  int     `json:"tick_jitter_sec"`
+	Quarters          int     `json:"quarters"`
+	QuarterSeconds    int     `json:"quarter_seconds"`
+	Pace              float64 `json:"pace"`
+	TickJitterSec     int     `json:"tick_jitter_sec"`
+	FreeThrowPct      float64 `json:"free_throw_pct"`
+	FreeThrowsPerFoul int     `json:"free_throws_per_foul"`
 }
 
 func (g Game) GameSeconds() float64 {
@@ -108,6 +110,12 @@ func load(fsys fs.FS) (*Bundle, error) {
 	}
 	if game.QuarterSeconds <= 0 {
 		game.QuarterSeconds = 720
+	}
+	if game.FreeThrowPct <= 0 {
+		game.FreeThrowPct = 0.75
+	}
+	if game.FreeThrowsPerFoul <= 0 {
+		game.FreeThrowsPerFoul = 2
 	}
 
 	byID := make(map[string]Team, len(teams))

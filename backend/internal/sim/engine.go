@@ -99,7 +99,15 @@ func (e *Engine) Step(s *State) Event {
 	case "turnover":
 		ev.Text = fmt.Sprintf("%s turnover", teamLabel(s, s.Offense))
 	case "foul":
-		ev.Text = fmt.Sprintf("%s foul", teamLabel(s, s.Offense))
+		made := 0
+		for i := 0; i < e.cfg.Game.FreeThrowsPerFoul; i++ {
+			if e.rng.Float64() < e.cfg.Game.FreeThrowPct {
+				made++
+			}
+		}
+		e.addScore(s, made)
+		ev.Points = made
+		ev.Text = fmt.Sprintf("%s foul → %d/%d FT (%d pts)", teamLabel(s, s.Offense), made, e.cfg.Game.FreeThrowsPerFoul, made)
 	default:
 		ev.Text = fmt.Sprintf("%s %s", teamLabel(s, s.Offense), outcome.Type)
 	}

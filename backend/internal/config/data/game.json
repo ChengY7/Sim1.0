@@ -2,5 +2,7 @@
   "quarters": 4,
   "quarter_seconds": 720,
   "pace": 100,
-  "tick_jitter_sec": 2
+  "tick_jitter_sec": 2,
+  "free_throw_pct": 0.75,
+  "free_throws_per_foul": 2
 }
