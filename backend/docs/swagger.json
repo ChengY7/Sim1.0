@@ -71,82 +71,90 @@
         }
     },
     "definitions": {
-        "github_com_chengyang_sim1_0_backend_internal_sim.Event": {
-            "type": "object",
-            "properties": {
-                "points": {
-                    "type": "integer"
-                },
-                "possession": {
-                    "type": "integer"
-                },
-                "team": {
-                    "$ref": "#/definitions/github_com_chengyang_sim1_0_backend_internal_sim.Side"
-                },
-                "text": {
-                    "type": "string"
-                },
-                "type": {
-                    "type": "string"
-                }
-            }
-        },
-        "github_com_chengyang_sim1_0_backend_internal_sim.Side": {
-            "type": "string",
-            "enum": [
-                "home",
-                "away"
-            ],
-            "x-enum-varnames": [
-                "Home",
-                "Away"
-            ]
-        },
-        "github_com_chengyang_sim1_0_backend_internal_sim.State": {
-            "type": "object",
-            "properties": {
-                "away_id": {
-                    "type": "string"
-                },
-                "away_name": {
-                    "type": "string"
-                },
-                "away_score": {
-                    "type": "integer"
-                },
-                "clock_sec": {
-                    "type": "integer"
-                },
-                "home_id": {
-                    "type": "string"
-                },
-                "home_name": {
-                    "type": "string"
-                },
-                "home_score": {
-                    "type": "integer"
-                },
-                "offense": {
-                    "$ref": "#/definitions/github_com_chengyang_sim1_0_backend_internal_sim.Side"
-                },
-                "possession": {
-                    "type": "integer"
-                },
-                "quarter": {
-                    "type": "integer"
-                },
-                "status": {
-                    "description": "in_progress | final",
-                    "type": "string"
-                }
-            }
-        },
         "internal_api.ErrorResponse": {
             "type": "object",
             "properties": {
                 "error": {
                     "type": "string",
                     "example": "unknown team id"
+                }
+            }
+        },
+        "internal_api.GameEvent": {
+            "type": "object",
+            "properties": {
+                "points": {
+                    "type": "integer",
+                    "example": 2
+                },
+                "possession": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "team": {
+                    "type": "string",
+                    "example": "home"
+                },
+                "text": {
+                    "type": "string",
+                    "example": "Lakers make_2pt (2 pts)"
+                },
+                "type": {
+                    "type": "string",
+                    "example": "make_2pt"
+                }
+            }
+        },
+        "internal_api.GameState": {
+            "type": "object",
+            "properties": {
+                "away_id": {
+                    "type": "string",
+                    "example": "BOS"
+                },
+                "away_name": {
+                    "type": "string",
+                    "example": "Celtics"
+                },
+                "away_score": {
+                    "type": "integer",
+                    "example": 98
+                },
+                "clock_sec": {
+                    "type": "integer",
+                    "example": 0
+                },
+                "home_id": {
+                    "type": "string",
+                    "example": "LAL"
+                },
+                "home_name": {
+                    "type": "string",
+                    "example": "Lakers"
+                },
+                "home_score": {
+                    "type": "integer",
+                    "example": 105
+                },
+                "offense": {
+                    "type": "string",
+                    "example": "home"
+                },
+                "period": {
+                    "type": "string",
+                    "example": "Q4"
+                },
+                "possession": {
+                    "type": "integer",
+                    "example": 201
+                },
+                "quarter": {
+                    "type": "integer",
+                    "example": 4
+                },
+                "status": {
+                    "type": "string",
+                    "example": "final"
                 }
             }
         },
@@ -184,7 +192,7 @@
                 "events": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_chengyang_sim1_0_backend_internal_sim.Event"
+                        "$ref": "#/definitions/internal_api.GameEvent"
                     }
                 },
                 "seed": {
@@ -192,7 +200,11 @@
                     "example": 42
                 },
                 "state": {
-                    "$ref": "#/definitions/github_com_chengyang_sim1_0_backend_internal_sim.State"
+                    "$ref": "#/definitions/internal_api.GameState"
+                },
+                "truncated": {
+                    "type": "boolean",
+                    "example": false
                 }
             }
         },

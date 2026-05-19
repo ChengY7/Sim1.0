@@ -27,7 +27,12 @@ func main() {
 		addr = ":8080"
 	}
 
+	corsOrigin := os.Getenv("CORS_ORIGIN")
+	if corsOrigin == "" {
+		corsOrigin = "http://localhost:3000"
+	}
+
 	h := api.NewHandlers(cfg)
 	log.Printf("Sim1.0 API on %s (Swagger: http://localhost%s/swagger/index.html)", addr, addr)
-	log.Fatal(http.ListenAndServe(addr, api.NewRouter(h)))
+	log.Fatal(http.ListenAndServe(addr, api.NewRouter(h, corsOrigin)))
 }

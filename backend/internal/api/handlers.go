@@ -75,12 +75,12 @@ func (h *Handlers) Simulate(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, SimulateResponse{
 		Seed:      seed,
 		Truncated: result.Truncated,
-		State:     toGameState(result.State),
+		State:     toGameState(result.State, h.cfg.Game.Quarters),
 		Events:    toGameEvents(result.Events),
 	})
 }
 
-func toGameState(s *sim.State) GameState {
+func toGameState(s *sim.State, quarters int) GameState {
 	return GameState{
 		HomeID:     s.HomeID,
 		AwayID:     s.AwayID,
@@ -91,6 +91,7 @@ func toGameState(s *sim.State) GameState {
 		Offense:    string(s.Offense),
 		Possession: s.Possession,
 		Quarter:    s.Quarter,
+		Period:     sim.PeriodLabel(s.Quarter, quarters),
 		ClockSec:   s.ClockSec,
 		Status:     s.Status,
 	}

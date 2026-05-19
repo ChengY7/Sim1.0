@@ -96,10 +96,10 @@ func (e *Engine) Step(s *State) Event {
 	}
 
 	switch outcome.Type {
-	case "make_2pt", "make_3pt", "make_ft":
+	case "make_2pt", "make_3pt":
 		e.addScore(s, outcome.Points)
 		ev.Text = fmt.Sprintf("%s %s (%d pts)", teamLabel(s, s.Offense), outcome.Type, outcome.Points)
-	case "miss_2pt", "miss_3pt", "miss_ft":
+	case "miss_2pt", "miss_3pt":
 		ev.Text = fmt.Sprintf("%s %s", teamLabel(s, s.Offense), outcome.Type)
 	case "turnover":
 		ev.Text = fmt.Sprintf("%s turnover", teamLabel(s, s.Offense))
@@ -181,14 +181,19 @@ func (e *Engine) tickClock(s *State) {
 
 	s.ClockSec -= elapsed
 	for s.ClockSec <= 0 && s.Status != "final" {
-		s.Quarter++
-		if s.Quarter > g.Quarters {
-			s.Quarter = g.Quarters
+		// check if the period that just ended decides the game
+		if s.Quarter >= g.Quarters && s.HomeScore != s.AwayScore {
 			s.ClockSec = 0
 			s.Status = "final"
 			return
 		}
-		s.ClockSec += g.QuarterSeconds
+		// advance to the next period
+		s.Quarter++
+		if s.Quarter > g.Quarters {
+			s.ClockSec += g.OTSeconds
+		} else {
+			s.ClockSec += g.QuarterSeconds
+		}
 	}
 }
 
@@ -197,4 +202,17 @@ func teamLabel(s *State, side Side) string {
 		return s.HomeName
 	}
 	return s.AwayName
+}
+
+// PeriodLabel converts a quarter number to a display label.
+// Quarters 1–n are "Q1"–"Qn"; beyond that: "OT", "2OT", "3OT", …
+func PeriodLabel(quarter, quarters int) string {
+	if quarter <= quarters {
+		return fmt.Sprintf("Q%d", quarter)
+	}
+	ot := quarter - quarters
+	if ot == 1 {
+		return "OT"
+	}
+	return fmt.Sprintf("%dOT", ot)
 }

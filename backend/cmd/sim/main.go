@@ -56,10 +56,10 @@ func main() {
 	if state.Status != "final" {
 		label = "Stopped early"
 	}
-	fmt.Printf("\n%s: %s %d — %d %s | Q%d %s | %d possessions (~%d expected) | %s\n",
+	fmt.Printf("\n%s: %s %d — %d %s | %s %s | %d possessions (~%d expected) | %s\n",
 		label,
 		state.HomeName, state.HomeScore, state.AwayScore, state.AwayName,
-		state.Quarter, formatClock(state.ClockSec),
+		sim.PeriodLabel(state.Quarter, bundle.Game.Quarters), formatClock(state.ClockSec),
 		state.Possession, expected, state.Status)
 }
 

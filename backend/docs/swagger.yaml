@@ -1,56 +1,66 @@
 basePath: /
 definitions:
-  github_com_chengyang_sim1_0_backend_internal_sim.Event:
-    properties:
-      points:
-        type: integer
-      possession:
-        type: integer
-      team:
-        $ref: '#/definitions/github_com_chengyang_sim1_0_backend_internal_sim.Side'
-      text:
-        type: string
-      type:
-        type: string
-    type: object
-  github_com_chengyang_sim1_0_backend_internal_sim.Side:
-    enum:
-    - home
-    - away
-    type: string
-    x-enum-varnames:
-    - Home
-    - Away
-  github_com_chengyang_sim1_0_backend_internal_sim.State:
-    properties:
-      away_id:
-        type: string
-      away_name:
-        type: string
-      away_score:
-        type: integer
-      clock_sec:
-        type: integer
-      home_id:
-        type: string
-      home_name:
-        type: string
-      home_score:
-        type: integer
-      offense:
-        $ref: '#/definitions/github_com_chengyang_sim1_0_backend_internal_sim.Side'
-      possession:
-        type: integer
-      quarter:
-        type: integer
-      status:
-        description: in_progress | final
-        type: string
-    type: object
   internal_api.ErrorResponse:
     properties:
       error:
         example: unknown team id
+        type: string
+    type: object
+  internal_api.GameEvent:
+    properties:
+      points:
+        example: 2
+        type: integer
+      possession:
+        example: 1
+        type: integer
+      team:
+        example: home
+        type: string
+      text:
+        example: Lakers make_2pt (2 pts)
+        type: string
+      type:
+        example: make_2pt
+        type: string
+    type: object
+  internal_api.GameState:
+    properties:
+      away_id:
+        example: BOS
+        type: string
+      away_name:
+        example: Celtics
+        type: string
+      away_score:
+        example: 98
+        type: integer
+      clock_sec:
+        example: 0
+        type: integer
+      home_id:
+        example: LAL
+        type: string
+      home_name:
+        example: Lakers
+        type: string
+      home_score:
+        example: 105
+        type: integer
+      offense:
+        example: home
+        type: string
+      period:
+        example: Q4
+        type: string
+      possession:
+        example: 201
+        type: integer
+      quarter:
+        example: 4
+        type: integer
+      status:
+        example: final
         type: string
     type: object
   internal_api.ListTeamsResponse:
@@ -76,13 +86,16 @@ definitions:
     properties:
       events:
         items:
-          $ref: '#/definitions/github_com_chengyang_sim1_0_backend_internal_sim.Event'
+          $ref: '#/definitions/internal_api.GameEvent'
         type: array
       seed:
         example: 42
         type: integer
       state:
-        $ref: '#/definitions/github_com_chengyang_sim1_0_backend_internal_sim.State'
+        $ref: '#/definitions/internal_api.GameState'
+      truncated:
+        example: false
+        type: boolean
     type: object
   internal_api.TeamOption:
     properties:

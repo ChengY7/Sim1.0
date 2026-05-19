@@ -26,6 +26,7 @@ type GameState struct {
 	Offense    string `json:"offense" example:"home"`
 	Possession int    `json:"possession" example:"201"`
 	Quarter    int    `json:"quarter" example:"4"`
+	Period     string `json:"period" example:"Q4"`
 	ClockSec   int    `json:"clock_sec" example:"0"`
 	Status     string `json:"status" example:"final"`
 }

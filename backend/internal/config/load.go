@@ -35,6 +35,7 @@ type OutcomesFile struct {
 type Game struct {
 	Quarters          int     `json:"quarters"`
 	QuarterSeconds    int     `json:"quarter_seconds"`
+	OTSeconds         int     `json:"ot_seconds"`
 	Pace              float64 `json:"pace"`
 	TickJitterSec     int     `json:"tick_jitter_sec"`
 	FreeThrowPct      float64 `json:"free_throw_pct"`
@@ -110,6 +111,9 @@ func load(fsys fs.FS) (*Bundle, error) {
 	}
 	if game.QuarterSeconds <= 0 {
 		game.QuarterSeconds = 720
+	}
+	if game.OTSeconds <= 0 {
+		game.OTSeconds = 300
 	}
 	if game.FreeThrowPct <= 0 {
 		game.FreeThrowPct = 0.75
