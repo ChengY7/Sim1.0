@@ -73,9 +73,39 @@ func (h *Handlers) Simulate(w http.ResponseWriter, r *http.Request) {
 	result := engine.RunUntilFinal()
 	writeJSON(w, http.StatusOK, SimulateResponse{
 		Seed:   seed,
-		State:  result.State,
-		Events: result.Events,
+		State:  toGameState(result.State),
+		Events: toGameEvents(result.Events),
 	})
+}
+
+func toGameState(s *sim.State) GameState {
+	return GameState{
+		HomeID:     s.HomeID,
+		AwayID:     s.AwayID,
+		HomeName:   s.HomeName,
+		AwayName:   s.AwayName,
+		HomeScore:  s.HomeScore,
+		AwayScore:  s.AwayScore,
+		Offense:    string(s.Offense),
+		Possession: s.Possession,
+		Quarter:    s.Quarter,
+		ClockSec:   s.ClockSec,
+		Status:     s.Status,
+	}
+}
+
+func toGameEvents(events []sim.Event) []GameEvent {
+	out := make([]GameEvent, len(events))
+	for i, e := range events {
+		out[i] = GameEvent{
+			Possession: e.Possession,
+			Team:       string(e.Team),
+			Type:       e.Type,
+			Points:     e.Points,
+			Text:       e.Text,
+		}
+	}
+	return out
 }
 
 func writeJSON(w http.ResponseWriter, status int, v any) {
