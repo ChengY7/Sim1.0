@@ -61,12 +61,17 @@ func NewEngine(cfg *config.Bundle, homeID, awayID string, seed int64) (*Engine, 
 }
 
 func (e *Engine) NewGame() *State {
+	// tip-off: coin flip seeded by the game RNG so result is deterministic per seed
+	tipWinner := Home
+	if e.rng.Intn(2) == 0 {
+		tipWinner = Away
+	}
 	return &State{
 		HomeID:   e.home.ID,
 		AwayID:   e.away.ID,
 		HomeName: e.home.Name,
 		AwayName: e.away.Name,
-		Offense:  Away,
+		Offense:  tipWinner,
 		Quarter:  1,
 		ClockSec: e.cfg.Game.QuarterSeconds,
 		Status:   "in_progress",
@@ -124,7 +129,7 @@ func (e *Engine) pickOutcome(offenseMult float64) config.Outcome {
 		w := o.Weight
 		if o.Points > 0 {
 			w *= offenseMult
-		} else if o.Type == "turnover" {
+		} else if o.Type == "turnover" || o.Type == "miss_2pt" || o.Type == "miss_3pt" {
 			w /= offenseMult
 		}
 		weights[i] = w
