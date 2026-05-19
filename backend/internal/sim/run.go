@@ -4,8 +4,9 @@ const MaxPossSafety = 300
 
 // Result is a completed (or safety-stopped) game.
 type Result struct {
-	State  *State  `json:"state"`
-	Events []Event `json:"events"`
+	State     *State  `json:"state"`
+	Events    []Event `json:"events"`
+	Truncated bool    `json:"truncated"` // true if MaxPossSafety was hit before the clock ended
 }
 
 // RunUntilFinal steps until the clock ends or MaxPossSafety is hit.
@@ -17,5 +18,5 @@ func (e *Engine) RunUntilFinal() Result {
 		events = append(events, e.Step(state))
 	}
 
-	return Result{State: state, Events: events}
+	return Result{State: state, Events: events, Truncated: state.Status != "final"}
 }

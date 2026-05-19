@@ -9,9 +9,10 @@ type SimulateRequest struct {
 
 // SimulateResponse is returned after a full game simulation.
 type SimulateResponse struct {
-	Seed   int64       `json:"seed" example:"42"`
-	State  GameState   `json:"state"`
-	Events []GameEvent `json:"events"`
+	Seed      int64       `json:"seed" example:"42"`
+	Truncated bool        `json:"truncated" example:"false"`
+	State     GameState   `json:"state"`
+	Events    []GameEvent `json:"events"`
 }
 
 // GameState is the final state of a simulated game.

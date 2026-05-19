@@ -73,9 +73,10 @@ func (h *Handlers) Simulate(w http.ResponseWriter, r *http.Request) {
 
 	result := engine.RunUntilFinal()
 	writeJSON(w, http.StatusOK, SimulateResponse{
-		Seed:   seed,
-		State:  toGameState(result.State),
-		Events: toGameEvents(result.Events),
+		Seed:      seed,
+		Truncated: result.Truncated,
+		State:     toGameState(result.State),
+		Events:    toGameEvents(result.Events),
 	})
 }
 
