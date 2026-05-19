@@ -1,0 +1,143 @@
+basePath: /
+definitions:
+  github_com_chengyang_sim1_0_backend_internal_sim.Event:
+    properties:
+      points:
+        type: integer
+      possession:
+        type: integer
+      team:
+        $ref: '#/definitions/github_com_chengyang_sim1_0_backend_internal_sim.Side'
+      text:
+        type: string
+      type:
+        type: string
+    type: object
+  github_com_chengyang_sim1_0_backend_internal_sim.Side:
+    enum:
+    - home
+    - away
+    type: string
+    x-enum-varnames:
+    - Home
+    - Away
+  github_com_chengyang_sim1_0_backend_internal_sim.State:
+    properties:
+      away_id:
+        type: string
+      away_name:
+        type: string
+      away_score:
+        type: integer
+      clock_sec:
+        type: integer
+      home_id:
+        type: string
+      home_name:
+        type: string
+      home_score:
+        type: integer
+      offense:
+        $ref: '#/definitions/github_com_chengyang_sim1_0_backend_internal_sim.Side'
+      possession:
+        type: integer
+      quarter:
+        type: integer
+      status:
+        description: in_progress | final
+        type: string
+    type: object
+  internal_api.ErrorResponse:
+    properties:
+      error:
+        example: unknown team id
+        type: string
+    type: object
+  internal_api.ListTeamsResponse:
+    properties:
+      teams:
+        items:
+          $ref: '#/definitions/internal_api.TeamOption'
+        type: array
+    type: object
+  internal_api.SimulateRequest:
+    properties:
+      away_team_id:
+        example: BOS
+        type: string
+      home_team_id:
+        example: LAL
+        type: string
+      seed:
+        example: 42
+        type: integer
+    type: object
+  internal_api.SimulateResponse:
+    properties:
+      events:
+        items:
+          $ref: '#/definitions/github_com_chengyang_sim1_0_backend_internal_sim.Event'
+        type: array
+      seed:
+        example: 42
+        type: integer
+      state:
+        $ref: '#/definitions/github_com_chengyang_sim1_0_backend_internal_sim.State'
+    type: object
+  internal_api.TeamOption:
+    properties:
+      id:
+        example: LAL
+        type: string
+      name:
+        example: Lakers
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: Possession-by-possession NBA game simulator API.
+  title: Sim1.0 API
+  version: "1.0"
+paths:
+  /simulate:
+    post:
+      consumes:
+      - application/json
+      description: Runs possessions until the game clock ends. Same seed produces
+        the same game.
+      parameters:
+      - description: Home/away team ids and optional seed
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/internal_api.SimulateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_api.SimulateResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_api.ErrorResponse'
+      summary: Simulate a full game
+      tags:
+      - simulate
+  /teams:
+    get:
+      description: Returns team ids and names from teams.json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_api.ListTeamsResponse'
+      summary: List all teams
+      tags:
+      - teams
+swagger: "2.0"

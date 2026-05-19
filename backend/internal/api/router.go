@@ -1,11 +1,16 @@
 package api
 
-import "net/http"
+import (
+	"net/http"
+
+	httpSwagger "github.com/swaggo/http-swagger"
+)
 
 func NewRouter(h *Handlers) http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /teams", h.ListTeams)
 	mux.HandleFunc("POST /simulate", h.Simulate)
+	mux.Handle("GET /swagger/", httpSwagger.WrapHandler)
 	return cors(mux)
 }
 

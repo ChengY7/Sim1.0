@@ -15,6 +15,7 @@ go run ./cmd/sim -home LAL -away BOS -seed 42 -quiet   # final line only
 
 ```bash
 go run ./cmd/server
+# Swagger UI: http://localhost:8080/swagger/index.html
 curl -s http://localhost:8080/teams
 curl -s -X POST http://localhost:8080/simulate \
   -H 'Content-Type: application/json' \
@@ -25,6 +26,14 @@ curl -s -X POST http://localhost:8080/simulate \
 |--------|------|-------------|
 | GET | `/teams` | All team ids from `teams.json` |
 | POST | `/simulate` | Run full game until clock ends; returns `state`, `events`, `seed` |
+| GET | `/swagger/index.html` | Interactive API docs (Swagger UI) |
+
+### Swagger setup
+
+```bash
+go install github.com/swaggo/swag/cmd/swag@latest
+make swagger   # generates backend/docs/ from handler comments
+```
 
 ## Config
 

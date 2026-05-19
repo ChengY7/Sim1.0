@@ -18,28 +18,34 @@ func NewHandlers(cfg *config.Bundle) *Handlers {
 	return &Handlers{cfg: cfg}
 }
 
-type simulateRequest struct {
-	HomeTeamID string `json:"home_team_id"`
-	AwayTeamID string `json:"away_team_id"`
-	Seed       *int64 `json:"seed,omitempty"`
-}
-
-type teamOption struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
-}
-
+// ListTeams godoc
+// @Summary      List all teams
+// @Description  Returns team ids and names from teams.json
+// @Tags         teams
+// @Produce      json
+// @Success      200  {object}  ListTeamsResponse
+// @Router       /teams [get]
 func (h *Handlers) ListTeams(w http.ResponseWriter, r *http.Request) {
-	opts := make([]teamOption, 0, len(h.cfg.Teams))
+	opts := make([]TeamOption, 0, len(h.cfg.Teams))
 	for _, t := range h.cfg.Teams {
-		opts = append(opts, teamOption{ID: t.ID, Name: t.Name})
+		opts = append(opts, TeamOption{ID: t.ID, Name: t.Name})
 	}
 	sort.Slice(opts, func(i, j int) bool { return opts[i].Name < opts[j].Name })
-	writeJSON(w, http.StatusOK, map[string]any{"teams": opts})
+	writeJSON(w, http.StatusOK, ListTeamsResponse{Teams: opts})
 }
 
+// Simulate godoc
+// @Summary      Simulate a full game
+// @Description  Runs possessions until the game clock ends. Same seed produces the same game.
+// @Tags         simulate
+// @Accept       json
+// @Produce      json
+// @Param        body  body      SimulateRequest  true  "Home/away team ids and optional seed"
+// @Success      200   {object}  SimulateResponse
+// @Failure      400   {object}  ErrorResponse
+// @Router       /simulate [post]
 func (h *Handlers) Simulate(w http.ResponseWriter, r *http.Request) {
-	var req simulateRequest
+	var req SimulateRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		writeError(w, http.StatusBadRequest, "invalid JSON body")
 		return
@@ -65,10 +71,10 @@ func (h *Handlers) Simulate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	result := engine.RunUntilFinal()
-	writeJSON(w, http.StatusOK, map[string]any{
-		"seed":   seed,
-		"state":  result.State,
-		"events": result.Events,
+	writeJSON(w, http.StatusOK, SimulateResponse{
+		Seed:   seed,
+		State:  result.State,
+		Events: result.Events,
 	})
 }
 
@@ -79,5 +85,5 @@ func writeJSON(w http.ResponseWriter, status int, v any) {
 }
 
 func writeError(w http.ResponseWriter, status int, msg string) {
-	writeJSON(w, status, map[string]string{"error": msg})
+	writeJSON(w, status, ErrorResponse{Error: msg})
 }
