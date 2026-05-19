@@ -1,14 +1,11 @@
 package config
 
 import (
+	"embed"
 	"encoding/json"
 	"fmt"
 	"io/fs"
 	"os"
-
-	_ "embed"
-
-	"embed"
 )
 
 //go:embed data
@@ -21,13 +18,19 @@ type Team struct {
 	Defense float64 `json:"defense"`
 }
 
+// Outcome represents one possible possession result.
+// OffenseScale controls how the outcome weight shifts with the offense/defense matchup:
+//   "up"   — good offense increases this outcome (scoring plays)
+//   "down" — good offense decreases this outcome (misses, turnovers)
+//   ""     — neutral; weight is unchanged (fouls)
 type Outcome struct {
-	Type   string  `json:"type"`
-	Points int     `json:"points"`
-	Weight float64 `json:"weight"`
+	Type         string  `json:"type"`
+	Points       int     `json:"points"`
+	Weight       float64 `json:"weight"`
+	OffenseScale string  `json:"offense_scale"`
 }
 
-type OutcomesFile struct {
+type outcomesFile struct {
 	Outcomes []Outcome `json:"outcomes"`
 }
 
@@ -42,7 +45,7 @@ type Game struct {
 	FreeThrowsPerFoul int     `json:"free_throws_per_foul"`
 }
 
-func (g Game) GameSeconds() float64 {
+func (g Game) gameSeconds() float64 {
 	return float64(g.Quarters * g.QuarterSeconds)
 }
 
@@ -53,7 +56,7 @@ func (g Game) ExpectedTotalPossessions() float64 {
 
 // SecondsPerPossession spreads game clock across all offensive possessions.
 func (g Game) SecondsPerPossession() float64 {
-	return g.GameSeconds() / g.ExpectedTotalPossessions()
+	return g.gameSeconds() / g.ExpectedTotalPossessions()
 }
 
 type Bundle struct {
@@ -90,7 +93,7 @@ func load(fsys fs.FS) (*Bundle, error) {
 	if err != nil {
 		return nil, fmt.Errorf("read outcomes: %w", err)
 	}
-	var of OutcomesFile
+	var of outcomesFile
 	if err := json.Unmarshal(outcomesData, &of); err != nil {
 		return nil, fmt.Errorf("parse outcomes: %w", err)
 	}

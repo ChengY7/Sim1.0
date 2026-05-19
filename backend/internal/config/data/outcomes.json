@@ -1,11 +1,11 @@
 {
-  "comment": "Base weights for one possession. Simulator scales by team offense vs defense. Fouls trigger free throws directly in the engine and are not listed here.",
+  "comment": "Base weights for one possession. offense_scale: 'up' = scales with good offense, 'down' = scales against, omit = neutral.",
   "outcomes": [
-    {"type": "turnover",  "points": 0, "weight": 0.12},
+    {"type": "turnover",  "points": 0, "weight": 0.12, "offense_scale": "down"},
     {"type": "foul",      "points": 0, "weight": 0.08},
-    {"type": "miss_2pt",  "points": 0, "weight": 0.22},
-    {"type": "make_2pt",  "points": 2, "weight": 0.32},
-    {"type": "miss_3pt",  "points": 0, "weight": 0.14},
-    {"type": "make_3pt",  "points": 3, "weight": 0.10}
+    {"type": "miss_2pt",  "points": 0, "weight": 0.22, "offense_scale": "down"},
+    {"type": "make_2pt",  "points": 2, "weight": 0.32, "offense_scale": "up"},
+    {"type": "miss_3pt",  "points": 0, "weight": 0.14, "offense_scale": "down"},
+    {"type": "make_3pt",  "points": 3, "weight": 0.10, "offense_scale": "up"}
   ]
 }

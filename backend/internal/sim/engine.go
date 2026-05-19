@@ -127,9 +127,10 @@ func (e *Engine) pickOutcome(offenseMult float64) config.Outcome {
 	var total float64
 	for i, o := range e.cfg.Outcomes {
 		w := o.Weight
-		if o.Points > 0 {
+		switch o.OffenseScale {
+		case "up":
 			w *= offenseMult
-		} else if o.Type == "turnover" || o.Type == "miss_2pt" || o.Type == "miss_3pt" {
+		case "down":
 			w /= offenseMult
 		}
 		weights[i] = w

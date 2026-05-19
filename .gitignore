@@ -3,6 +3,7 @@
 
 # Go
 backend/bin/
+backend/sim
 *.exe
 *.test
 
