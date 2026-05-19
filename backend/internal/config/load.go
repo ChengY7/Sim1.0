@@ -94,6 +94,9 @@ func load(fsys fs.FS) (*Bundle, error) {
 	if err := json.Unmarshal(outcomesData, &of); err != nil {
 		return nil, fmt.Errorf("parse outcomes: %w", err)
 	}
+	if len(of.Outcomes) == 0 {
+		return nil, fmt.Errorf("outcomes.json must define at least one outcome")
+	}
 
 	gameData, err := fs.ReadFile(fsys, "game.json")
 	if err != nil {

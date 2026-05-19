@@ -92,6 +92,19 @@ func TestLoad_Defaults(t *testing.T) {
 	}
 }
 
+func TestLoad_EmptyOutcomes(t *testing.T) {
+	dir := t.TempDir()
+	writeFile(t, filepath.Join(dir, "teams.json"),
+		`[{"id":"X","name":"X","offense":1.0,"defense":1.0}]`)
+	writeFile(t, filepath.Join(dir, "outcomes.json"), `{"outcomes":[]}`)
+	writeFile(t, filepath.Join(dir, "game.json"), `{}`)
+
+	_, err := config.LoadDir(dir)
+	if err == nil {
+		t.Fatal("expected error for empty outcomes")
+	}
+}
+
 func TestTeam_UnknownID(t *testing.T) {
 	b, _ := config.Load()
 	_, err := b.Team("FAKE")
