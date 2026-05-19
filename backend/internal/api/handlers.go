@@ -88,13 +88,20 @@ func toGameState(s *sim.State, quarters int) GameState {
 		AwayName:   s.AwayName,
 		HomeScore:  s.HomeScore,
 		AwayScore:  s.AwayScore,
-		Offense:    string(s.Offense),
+		Offense:    offenseField(s),
 		Possession: s.Possession,
 		Quarter:    s.Quarter,
 		Period:     sim.PeriodLabel(s.Quarter, quarters),
 		ClockSec:   s.ClockSec,
 		Status:     s.Status,
 	}
+}
+
+func offenseField(s *sim.State) string {
+	if s.Status == "final" {
+		return ""
+	}
+	return string(s.Offense)
 }
 
 func toGameEvents(events []sim.Event) []GameEvent {

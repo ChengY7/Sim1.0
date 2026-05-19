@@ -33,7 +33,7 @@ type State struct {
 	Possession int    `json:"possession"`
 	Quarter    int    `json:"quarter"`
 	ClockSec   int    `json:"clock_sec"`
-	Status     string `json:"status"` // in_progress | final
+	Status     string `json:"status"` // in_progress | final; if final was never reached, see Result.Truncated
 }
 
 type Engine struct {
@@ -112,7 +112,7 @@ func (e *Engine) Step(s *State) Event {
 		}
 		e.addScore(s, made)
 		ev.Points = made
-		ev.Text = fmt.Sprintf("%s foul → %d/%d FT (%d pts)", teamLabel(s, s.Offense), made, e.cfg.Game.FreeThrowsPerFoul, made)
+		ev.Text = fmt.Sprintf("%s foul → %d/%d FT", teamLabel(s, s.Offense), made, e.cfg.Game.FreeThrowsPerFoul)
 	default:
 		ev.Text = fmt.Sprintf("%s %s", teamLabel(s, s.Offense), outcome.Type)
 	}

@@ -118,8 +118,8 @@ func TestRunUntilFinal_ScoresMatchEvents(t *testing.T) {
 
 func TestRunUntilFinal_OT(t *testing.T) {
 	b := loadBundle(t)
-	result, _ := sim.NewEngine(b, "LAL", "BOS", 16)
-	r := result.RunUntilFinal()
+	engine, _ := sim.NewEngine(b, "LAL", "BOS", 16)
+	r := engine.RunUntilFinal()
 
 	if r.State.Quarter != b.Game.Quarters+1 {
 		t.Errorf("expected OT (quarter %d), got %d", b.Game.Quarters+1, r.State.Quarter)
@@ -132,10 +132,43 @@ func TestRunUntilFinal_OT(t *testing.T) {
 	}
 }
 
+func TestRunUntilFinal_Truncated(t *testing.T) {
+	// Outcomes that never score keep both teams at 0-0, so every period ends tied and
+	// the game extends into infinite OT. The safety limit eventually fires.
+	b := &config.Bundle{
+		Teams: map[string]config.Team{
+			"A": {ID: "A", Name: "Alpha", Offense: 1, Defense: 1},
+			"B": {ID: "B", Name: "Beta", Offense: 1, Defense: 1},
+		},
+		Outcomes: []config.Outcome{
+			{Type: "miss_2pt", Points: 0, Weight: 1, OffenseScale: ""},
+		},
+		Game: config.Game{
+			Quarters:          1,
+			QuarterSeconds:    10,
+			OTSeconds:         10,
+			Pace:              1, // safetyLimit ≈ 2 + 20*otPerPeriod; infinite ties exhaust it
+			FreeThrowPct:      0.75,
+			FreeThrowsPerFoul: 2,
+		},
+	}
+	engine, err := sim.NewEngine(b, "A", "B", 1)
+	if err != nil {
+		t.Fatalf("NewEngine: %v", err)
+	}
+	r := engine.RunUntilFinal()
+	if !r.Truncated {
+		t.Error("expected Truncated=true when safety limit fires before clock expires")
+	}
+	if r.State.Status == "final" {
+		t.Error("status must not be final when truncated")
+	}
+}
+
 func TestRunUntilFinal_2OT(t *testing.T) {
 	b := loadBundle(t)
-	result, _ := sim.NewEngine(b, "LAL", "BOS", 679)
-	r := result.RunUntilFinal()
+	engine, _ := sim.NewEngine(b, "LAL", "BOS", 679)
+	r := engine.RunUntilFinal()
 
 	if r.State.Quarter != b.Game.Quarters+2 {
 		t.Errorf("expected 2OT (quarter %d), got %d", b.Game.Quarters+2, r.State.Quarter)

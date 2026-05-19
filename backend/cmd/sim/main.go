@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"sort"
 	"time"
 
 	"github.com/chengyang/sim1.0/backend/internal/config"
@@ -11,16 +12,24 @@ import (
 )
 
 func main() {
-	home := flag.String("home", "LAL", "home team id (see config/teams.json)")
+	home := flag.String("home", "LAL", "home team id (use -teams to list all)")
 	away := flag.String("away", "BOS", "away team id")
 	seed := flag.Int64("seed", 0, "RNG seed (0 = time-based)")
 	quiet := flag.Bool("quiet", false, "only print final line")
+	teams := flag.Bool("teams", false, "list all team ids and exit")
 	flag.Parse()
 
 	bundle, err := config.Load()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "load config: %v\n", err)
 		os.Exit(1)
+	}
+
+	if *teams {
+		for _, t := range sortedTeams(bundle) {
+			fmt.Printf("%-6s %s\n", t.ID, t.Name)
+		}
+		return
 	}
 
 	s := *seed
@@ -61,6 +70,15 @@ func main() {
 		state.HomeName, state.HomeScore, state.AwayScore, state.AwayName,
 		sim.PeriodLabel(state.Quarter, bundle.Game.Quarters), formatClock(state.ClockSec),
 		state.Possession, expected, state.Status)
+}
+
+func sortedTeams(b *config.Bundle) []config.Team {
+	out := make([]config.Team, 0, len(b.Teams))
+	for _, t := range b.Teams {
+		out = append(out, t)
+	}
+	sort.Slice(out, func(i, j int) bool { return out[i].ID < out[j].ID })
+	return out
 }
 
 func formatClock(sec int) string {
