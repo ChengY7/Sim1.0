@@ -34,10 +34,14 @@ type GameState struct {
 // GameEvent describes a single possession.
 type GameEvent struct {
 	Possession int    `json:"possession" example:"1"`
+	Period     string `json:"period" example:"Q4"`
+	ClockSec   int    `json:"clock_sec" example:"45"`
 	Team       string `json:"team" example:"home"`
 	Type       string `json:"type" example:"make_2pt"`
 	Points     int    `json:"points" example:"2"`
 	Text       string `json:"text" example:"Lakers make_2pt (2 pts)"`
+	HomeScore  int    `json:"home_score" example:"105"`
+	AwayScore  int    `json:"away_score" example:"98"`
 }
 
 // TeamOption is a team entry for dropdowns.

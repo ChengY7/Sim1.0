@@ -89,6 +89,22 @@ const docTemplate = `{
         "internal_api.GameEvent": {
             "type": "object",
             "properties": {
+                "away_score": {
+                    "type": "integer",
+                    "example": 98
+                },
+                "clock_sec": {
+                    "type": "integer",
+                    "example": 45
+                },
+                "home_score": {
+                    "type": "integer",
+                    "example": 105
+                },
+                "period": {
+                    "type": "string",
+                    "example": "Q4"
+                },
                 "points": {
                     "type": "integer",
                     "example": 2

@@ -189,7 +189,7 @@ func (e *Engine) tickClock(s *State) {
 	}
 
 	s.ClockSec -= elapsed
-	for s.ClockSec <= 0 && s.Status != "final" {
+	if s.ClockSec <= 0 {
 		// check if the period that just ended decides the game
 		if s.Quarter >= g.Quarters && s.HomeScore != s.AwayScore {
 			s.ClockSec = 0

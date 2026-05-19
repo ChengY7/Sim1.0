@@ -127,6 +127,9 @@ func load(fsys fs.FS) (*Bundle, error) {
 	if game.FreeThrowsPerFoul <= 0 {
 		game.FreeThrowsPerFoul = 2
 	}
+	if game.TickJitterSec < 0 {
+		game.TickJitterSec = 0
+	}
 
 	byID := make(map[string]Team, len(teams))
 	for _, t := range teams {

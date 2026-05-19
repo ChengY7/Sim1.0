@@ -109,10 +109,14 @@ func toGameEvents(events []sim.Event) []GameEvent {
 	for i, e := range events {
 		out[i] = GameEvent{
 			Possession: e.Possession,
+			Period:     e.Period,
+			ClockSec:   e.ClockSec,
 			Team:       string(e.Team),
 			Type:       e.Type,
 			Points:     e.Points,
 			Text:       e.Text,
+			HomeScore:  e.HomeScore,
+			AwayScore:  e.AwayScore,
 		}
 	}
 	return out

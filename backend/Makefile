@@ -1,6 +1,6 @@
 .PHONY: swagger run
 
-swagger:
+swag:
 	swag init -g cmd/server/main.go -o docs --parseDependency --parseInternal
 
 run:

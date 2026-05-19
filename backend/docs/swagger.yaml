@@ -8,6 +8,18 @@ definitions:
     type: object
   internal_api.GameEvent:
     properties:
+      away_score:
+        example: 98
+        type: integer
+      clock_sec:
+        example: 45
+        type: integer
+      home_score:
+        example: 105
+        type: integer
+      period:
+        example: Q4
+        type: string
       points:
         example: 2
         type: integer
