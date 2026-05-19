@@ -20,6 +20,8 @@ type Event struct {
 	Type       string `json:"type"`
 	Points     int    `json:"points"`
 	Text       string `json:"text"`
+	HomeScore  int    `json:"home_score"`
+	AwayScore  int    `json:"away_score"`
 }
 
 type State struct {
@@ -119,6 +121,8 @@ func (e *Engine) Step(s *State) Event {
 
 	e.tickClock(s)
 	e.flipPossession(s)
+	ev.HomeScore = s.HomeScore
+	ev.AwayScore = s.AwayScore
 	return ev
 }
 

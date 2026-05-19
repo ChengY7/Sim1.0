@@ -57,7 +57,7 @@ func main() {
 
 	if !*quiet {
 		for _, ev := range result.Events {
-			fmt.Printf("P%03d  %s\n", ev.Possession, ev.Text)
+			fmt.Printf("P%03d  %-40s %d-%d\n", ev.Possession, ev.Text, ev.HomeScore, ev.AwayScore)
 		}
 	}
 
