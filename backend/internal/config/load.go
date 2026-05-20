@@ -60,10 +60,27 @@ func (g Game) SecondsPerPossession() float64 {
 	return g.gameSeconds() / g.ExpectedTotalPossessions()
 }
 
+// ScheduleGame is one regular-season game from schedule.json.
+type ScheduleGame struct {
+	Date     string `json:"date"`
+	TimeET   string `json:"time_et"`
+	Away     string `json:"away"`
+	Home     string `json:"home"`
+	NbaCup   bool   `json:"nba_cup"`
+	Excluded bool   `json:"excluded"`
+}
+
+// Schedule is the top-level structure of schedule.json.
+type Schedule struct {
+	Season string         `json:"season"`
+	Games  []ScheduleGame `json:"games"`
+}
+
 type Bundle struct {
 	Teams    map[string]Team
 	Outcomes []Outcome
 	Game     Game
+	Schedule Schedule
 }
 
 // Load returns a Bundle using the configs embedded at build time.
@@ -151,10 +168,19 @@ func load(fsys fs.FS) (*Bundle, error) {
 		byID[t.ID] = t
 	}
 
+	var schedule Schedule
+	if scheduleData, err := fs.ReadFile(fsys, "schedule.json"); err == nil {
+		if err := json.Unmarshal(scheduleData, &schedule); err != nil {
+			return nil, fmt.Errorf("parse schedule: %w", err)
+		}
+	}
+	// If schedule.json is absent the bundle simply has no games (tests use minimal dirs).
+
 	return &Bundle{
 		Teams:    byID,
 		Outcomes: of.Outcomes,
 		Game:     game,
+		Schedule: schedule,
 	}, nil
 }
 

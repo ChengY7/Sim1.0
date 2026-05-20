@@ -10,6 +10,7 @@ func NewRouter(h *Handlers, corsOrigin string) http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /teams", h.ListTeams)
 	mux.HandleFunc("POST /simulate", h.Simulate)
+	mux.HandleFunc("POST /simulate/season", h.SimulateSeason)
 	mux.Handle("GET /swagger/", httpSwagger.WrapHandler)
 	return cors(mux, corsOrigin)
 }

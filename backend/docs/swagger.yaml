@@ -110,6 +110,23 @@ definitions:
         example: false
         type: boolean
     type: object
+  internal_api.SimulateSeasonRequest:
+    properties:
+      seed:
+        example: 42
+        type: integer
+    type: object
+  internal_api.SimulateSeasonResponse:
+    properties:
+      season:
+        type: string
+      seed:
+        type: integer
+      standings:
+        items:
+          $ref: '#/definitions/internal_api.TeamSeasonStat'
+        type: array
+    type: object
   internal_api.TeamOption:
     properties:
       id:
@@ -118,6 +135,42 @@ definitions:
       name:
         example: Lakers
         type: string
+    type: object
+  internal_api.TeamSeasonStat:
+    properties:
+      away_record:
+        example: 24-17
+        type: string
+      diff:
+        example: 4.4
+        type: number
+      home_record:
+        example: 30-11
+        type: string
+      l:
+        example: 28
+        type: integer
+      last_10:
+        example: 7-3
+        type: string
+      oppg:
+        example: 109.8
+        type: number
+      ppg:
+        example: 114.2
+        type: number
+      streak:
+        example: W3
+        type: string
+      team_id:
+        example: LAL
+        type: string
+      team_name:
+        example: Lakers
+        type: string
+      w:
+        example: 54
+        type: integer
     type: object
 host: localhost:8080
 info:
@@ -151,6 +204,28 @@ paths:
           schema:
             $ref: '#/definitions/internal_api.ErrorResponse'
       summary: Simulate a full game
+      tags:
+      - simulate
+  /simulate/season:
+    post:
+      consumes:
+      - application/json
+      description: Runs every game in the 2025-26 schedule and returns standings with
+        W, L, streak, last-10, home/away records, PPG, OPPG, and DIFF.
+      parameters:
+      - description: Optional seed for reproducibility
+        in: body
+        name: body
+        schema:
+          $ref: '#/definitions/internal_api.SimulateSeasonRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_api.SimulateSeasonResponse'
+      summary: Simulate a full NBA regular season
       tags:
       - simulate
   /teams:

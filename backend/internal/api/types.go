@@ -55,6 +55,33 @@ type ListTeamsResponse struct {
 	Teams []TeamOption `json:"teams"`
 }
 
+// SimulateSeasonRequest is the body for POST /simulate/season.
+type SimulateSeasonRequest struct {
+	Seed *int64 `json:"seed,omitempty" example:"42"`
+}
+
+// SimulateSeasonResponse is returned after a full season simulation.
+type SimulateSeasonResponse struct {
+	Seed      int64            `json:"seed"`
+	Season    string           `json:"season"`
+	Standings []TeamSeasonStat `json:"standings"`
+}
+
+// TeamSeasonStat holds end-of-season stats for one team.
+type TeamSeasonStat struct {
+	TeamID     string  `json:"team_id"      example:"LAL"`
+	TeamName   string  `json:"team_name"    example:"Lakers"`
+	W          int     `json:"w"            example:"54"`
+	L          int     `json:"l"            example:"28"`
+	Streak     string  `json:"streak"       example:"W3"`
+	Last10     string  `json:"last_10"      example:"7-3"`
+	HomeRecord string  `json:"home_record"  example:"30-11"`
+	AwayRecord string  `json:"away_record"  example:"24-17"`
+	PPG        float64 `json:"ppg"          example:"114.2"`
+	OPPG       float64 `json:"oppg"         example:"109.8"`
+	Diff       float64 `json:"diff"         example:"4.4"`
+}
+
 // ErrorResponse is returned on 4xx errors.
 type ErrorResponse struct {
 	Error string `json:"error" example:"unknown team id"`

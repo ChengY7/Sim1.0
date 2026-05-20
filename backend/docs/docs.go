@@ -55,6 +55,39 @@ const docTemplate = `{
                 }
             }
         },
+        "/simulate/season": {
+            "post": {
+                "description": "Runs every game in the 2025-26 schedule and returns standings with W, L, streak, last-10, home/away records, PPG, OPPG, and DIFF.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "simulate"
+                ],
+                "summary": "Simulate a full NBA regular season",
+                "parameters": [
+                    {
+                        "description": "Optional seed for reproducibility",
+                        "name": "body",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/internal_api.SimulateSeasonRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_api.SimulateSeasonResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/teams": {
             "get": {
                 "description": "Returns team ids and names from teams.json",
@@ -231,6 +264,32 @@ const docTemplate = `{
                 }
             }
         },
+        "internal_api.SimulateSeasonRequest": {
+            "type": "object",
+            "properties": {
+                "seed": {
+                    "type": "integer",
+                    "example": 42
+                }
+            }
+        },
+        "internal_api.SimulateSeasonResponse": {
+            "type": "object",
+            "properties": {
+                "season": {
+                    "type": "string"
+                },
+                "seed": {
+                    "type": "integer"
+                },
+                "standings": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/internal_api.TeamSeasonStat"
+                    }
+                }
+            }
+        },
         "internal_api.TeamOption": {
             "type": "object",
             "properties": {
@@ -241,6 +300,55 @@ const docTemplate = `{
                 "name": {
                     "type": "string",
                     "example": "Lakers"
+                }
+            }
+        },
+        "internal_api.TeamSeasonStat": {
+            "type": "object",
+            "properties": {
+                "away_record": {
+                    "type": "string",
+                    "example": "24-17"
+                },
+                "diff": {
+                    "type": "number",
+                    "example": 4.4
+                },
+                "home_record": {
+                    "type": "string",
+                    "example": "30-11"
+                },
+                "l": {
+                    "type": "integer",
+                    "example": 28
+                },
+                "last_10": {
+                    "type": "string",
+                    "example": "7-3"
+                },
+                "oppg": {
+                    "type": "number",
+                    "example": 109.8
+                },
+                "ppg": {
+                    "type": "number",
+                    "example": 114.2
+                },
+                "streak": {
+                    "type": "string",
+                    "example": "W3"
+                },
+                "team_id": {
+                    "type": "string",
+                    "example": "LAL"
+                },
+                "team_name": {
+                    "type": "string",
+                    "example": "Lakers"
+                },
+                "w": {
+                    "type": "integer",
+                    "example": 54
                 }
             }
         }

@@ -80,6 +80,53 @@ func (h *Handlers) Simulate(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// SimulateSeason godoc
+// @Summary      Simulate a full NBA regular season
+// @Description  Runs every game in the 2025-26 schedule and returns standings with W, L, streak, last-10, home/away records, PPG, OPPG, and DIFF.
+// @Tags         simulate
+// @Accept       json
+// @Produce      json
+// @Param        body  body      SimulateSeasonRequest  false  "Optional seed for reproducibility"
+// @Success      200   {object}  SimulateSeasonResponse
+// @Router       /simulate/season [post]
+func (h *Handlers) SimulateSeason(w http.ResponseWriter, r *http.Request) {
+	r.Body = http.MaxBytesReader(w, r.Body, 4096)
+	var req SimulateSeasonRequest
+	// Body is optional — ignore decode errors for empty bodies.
+	_ = json.NewDecoder(r.Body).Decode(&req)
+
+	seed := time.Now().UnixNano()
+	if req.Seed != nil {
+		seed = *req.Seed
+	}
+
+	standings := sim.SimulateSeason(h.cfg, seed)
+
+	// Map sim.TeamSeasonStat → api.TeamSeasonStat
+	out := make([]TeamSeasonStat, len(standings))
+	for i, s := range standings {
+		out[i] = TeamSeasonStat{
+			TeamID:     s.TeamID,
+			TeamName:   s.TeamName,
+			W:          s.W,
+			L:          s.L,
+			Streak:     s.Streak,
+			Last10:     s.Last10,
+			HomeRecord: s.HomeRecord,
+			AwayRecord: s.AwayRecord,
+			PPG:        s.PPG,
+			OPPG:       s.OPPG,
+			Diff:       s.Diff,
+		}
+	}
+
+	writeJSON(w, http.StatusOK, SimulateSeasonResponse{
+		Seed:      seed,
+		Season:    h.cfg.Schedule.Season,
+		Standings: out,
+	})
+}
+
 func toGameState(s *sim.State, quarters int) GameState {
 	return GameState{
 		HomeID:     s.HomeID,
