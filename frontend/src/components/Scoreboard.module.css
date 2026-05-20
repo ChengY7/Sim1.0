@@ -35,8 +35,8 @@
   font-size: 56px; font-weight: 900; letter-spacing: -2px; line-height: 1;
   font-variant-numeric: tabular-nums;
 }
-.home .score { color: var(--accent-home); }
-.away .score { color: var(--accent-away); }
+.scoreWin  { color: var(--success); }
+.scoreLose { color: var(--text-secondary); }
 .dash { font-size: 28px; font-weight: 300; color: var(--text-muted); flex-shrink: 0; }
 
 .statusRow { text-align: center; margin-top: 16px; }

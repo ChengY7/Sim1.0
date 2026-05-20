@@ -2,9 +2,10 @@ import styles from './Scoreboard.module.css'
 import { espnLogo } from '../utils/espnLogo'
 
 export default function Scoreboard({ state, seed, homeId, awayId }) {
-  const diff     = Math.abs(state.home_score - state.away_score)
-  const winName  = state.home_score > state.away_score ? state.home_name : state.away_name
-  const loseName = state.home_score > state.away_score ? state.away_name : state.home_name
+  const diff      = Math.abs(state.home_score - state.away_score)
+  const homeWins  = state.home_score > state.away_score
+  const winName   = homeWins ? state.home_name : state.away_name
+  const loseName  = homeWins ? state.away_name : state.home_name
 
   return (
     <>
@@ -21,7 +22,7 @@ export default function Scoreboard({ state, seed, homeId, awayId }) {
               />
             )}
             <div className={styles.teamName}>{state.home_name}</div>
-            <div className={styles.score}>{state.home_score}</div>
+            <div className={`${styles.score} ${homeWins ? styles.scoreWin : styles.scoreLose}`}>{state.home_score}</div>
           </div>
           <div className={styles.dash}>—</div>
           <div className={`${styles.team} ${styles.away}`}>
@@ -34,7 +35,7 @@ export default function Scoreboard({ state, seed, homeId, awayId }) {
               />
             )}
             <div className={styles.teamName}>{state.away_name}</div>
-            <div className={styles.score}>{state.away_score}</div>
+            <div className={`${styles.score} ${homeWins ? styles.scoreLose : styles.scoreWin}`}>{state.away_score}</div>
           </div>
         </div>
         <div className={styles.statusRow}>
