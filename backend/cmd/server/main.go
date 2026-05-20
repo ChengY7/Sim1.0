@@ -33,6 +33,6 @@ func main() {
 	}
 
 	h := api.NewHandlers(cfg)
-	log.Printf("Sim1.0 API on %s (Swagger: http://localhost%s/swagger/index.html)", addr, addr)
+	log.Printf("Sim1.0 API on %s — Swagger: http://localhost%s/swagger/index.html", addr, addr)
 	log.Fatal(http.ListenAndServe(addr, api.NewRouter(h, corsOrigin)))
 }

@@ -101,6 +101,11 @@ func load(fsys fs.FS) (*Bundle, error) {
 	if len(of.Outcomes) == 0 {
 		return nil, fmt.Errorf("outcomes.json must define at least one outcome")
 	}
+	for _, o := range of.Outcomes {
+		if o.Weight <= 0 {
+			return nil, fmt.Errorf("outcome %q: weight must be > 0, got %g", o.Type, o.Weight)
+		}
+	}
 
 	gameData, err := fs.ReadFile(fsys, "game.json")
 	if err != nil {
@@ -122,7 +127,7 @@ func load(fsys fs.FS) (*Bundle, error) {
 	if game.OTSeconds <= 0 {
 		game.OTSeconds = 300
 	}
-	if game.FreeThrowPct <= 0 {
+	if game.FreeThrowPct <= 0 || game.FreeThrowPct > 1 {
 		game.FreeThrowPct = 0.75
 	}
 	if game.FreeThrowsPerFoul <= 0 {

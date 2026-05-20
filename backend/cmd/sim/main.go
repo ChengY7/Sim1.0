@@ -12,7 +12,7 @@ import (
 
 func main() {
 	home := flag.String("home", "LAL", "home team id (use -teams to list all)")
-	away := flag.String("away", "BOS", "away team id")
+	away := flag.String("away", "BOS", "away team id (use -teams to list all)")
 	seed := flag.Int64("seed", 0, "RNG seed (0 = time-based)")
 	quiet := flag.Bool("quiet", false, "only print final line")
 	teams := flag.Bool("teams", false, "list all team ids and exit")
@@ -45,18 +45,13 @@ func main() {
 	g := bundle.Game
 	expected := int(g.ExpectedTotalPossessions())
 
-	if !*quiet {
-		homeTeam, _ := bundle.Team(*home)
-		awayTeam, _ := bundle.Team(*away)
-		fmt.Printf("Sim1.0 — %s vs %s (seed %d)\n", homeTeam.Name, awayTeam.Name, s)
-		fmt.Printf("Pace %g → ~%d total possessions, ~%.1fs per possession\n\n",
-			g.Pace, expected, g.SecondsPerPossession())
-	}
-
 	result := engine.RunUntilFinal()
 	state := result.State
 
 	if !*quiet {
+		fmt.Printf("Sim1.0 — %s vs %s (seed %d)\n", state.HomeName, state.AwayName, s)
+		fmt.Printf("Pace %g → ~%d total possessions, ~%.1fs per possession\n\n",
+			g.Pace, expected, g.SecondsPerPossession())
 		for _, ev := range result.Events {
 			clock := fmt.Sprintf("%s %s", ev.Period, formatClock(ev.ClockSec))
 			fmt.Printf("P%03d  %-10s  %-40s %d-%d\n", ev.Possession, clock, ev.Text, ev.HomeScore, ev.AwayScore)

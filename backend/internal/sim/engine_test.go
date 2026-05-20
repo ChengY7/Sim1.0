@@ -117,13 +117,13 @@ func TestRunUntilFinal_ScoresMatchEvents(t *testing.T) {
 }
 
 func TestRunUntilFinal_OT(t *testing.T) {
+	b := loadBundle(t)
 	r := newEngine(t, "LAL", "BOS", 15).RunUntilFinal()
-	quarters := loadBundle(t).Game.Quarters
 
-	if r.State.Quarter != quarters+1 {
-		t.Errorf("expected OT (quarter %d), got %d", quarters+1, r.State.Quarter)
+	if r.State.Quarter != b.Game.Quarters+1 {
+		t.Errorf("expected OT (quarter %d), got %d", b.Game.Quarters+1, r.State.Quarter)
 	}
-	if label := sim.PeriodLabel(r.State.Quarter, quarters); label != "OT" {
+	if label := sim.PeriodLabel(r.State.Quarter, b.Game.Quarters); label != "OT" {
 		t.Errorf("period label = %q, want OT", label)
 	}
 	if r.State.HomeScore == r.State.AwayScore {
@@ -165,13 +165,13 @@ func TestRunUntilFinal_Truncated(t *testing.T) {
 }
 
 func TestRunUntilFinal_2OT(t *testing.T) {
+	b := loadBundle(t)
 	r := newEngine(t, "LAL", "BOS", 55).RunUntilFinal()
-	quarters := loadBundle(t).Game.Quarters
 
-	if r.State.Quarter != quarters+2 {
-		t.Errorf("expected 2OT (quarter %d), got %d", quarters+2, r.State.Quarter)
+	if r.State.Quarter != b.Game.Quarters+2 {
+		t.Errorf("expected 2OT (quarter %d), got %d", b.Game.Quarters+2, r.State.Quarter)
 	}
-	if label := sim.PeriodLabel(r.State.Quarter, quarters); label != "2OT" {
+	if label := sim.PeriodLabel(r.State.Quarter, b.Game.Quarters); label != "2OT" {
 		t.Errorf("period label = %q, want 2OT", label)
 	}
 	if r.State.HomeScore == r.State.AwayScore {

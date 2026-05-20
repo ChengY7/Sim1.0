@@ -34,6 +34,37 @@ func TestLoad_Embedded(t *testing.T) {
 	}
 }
 
+func TestLoad_NegativeOutcomeWeight(t *testing.T) {
+	dir := t.TempDir()
+	writeFile(t, filepath.Join(dir, "teams.json"),
+		`[{"id":"X","name":"X","offense":1.0,"defense":1.0}]`)
+	writeFile(t, filepath.Join(dir, "outcomes.json"),
+		`{"outcomes":[{"type":"make_2pt","points":2,"weight":-1}]}`)
+	writeFile(t, filepath.Join(dir, "game.json"), `{}`)
+
+	_, err := config.LoadDir(dir)
+	if err == nil {
+		t.Fatal("expected error for negative outcome weight")
+	}
+}
+
+func TestLoad_InvalidFreeThrowPct(t *testing.T) {
+	dir := t.TempDir()
+	writeFile(t, filepath.Join(dir, "teams.json"),
+		`[{"id":"X","name":"X","offense":1.0,"defense":1.0}]`)
+	writeFile(t, filepath.Join(dir, "outcomes.json"),
+		`{"outcomes":[{"type":"make_2pt","points":2,"weight":1}]}`)
+	writeFile(t, filepath.Join(dir, "game.json"), `{"free_throw_pct":1.5}`)
+
+	b, err := config.LoadDir(dir)
+	if err != nil {
+		t.Fatalf("LoadDir: %v", err)
+	}
+	if b.Game.FreeThrowPct != 0.75 {
+		t.Errorf("free_throw_pct = %g, want default 0.75", b.Game.FreeThrowPct)
+	}
+}
+
 func TestLoad_InvalidDefense(t *testing.T) {
 	dir := t.TempDir()
 	writeFile(t, filepath.Join(dir, "teams.json"),
