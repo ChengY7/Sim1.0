@@ -1,6 +1,7 @@
 import styles from './Scoreboard.module.css'
+import { espnLogo } from '../utils/espnLogo'
 
-export default function Scoreboard({ state, seed }) {
+export default function Scoreboard({ state, seed, homeId, awayId }) {
   const diff     = Math.abs(state.home_score - state.away_score)
   const winName  = state.home_score > state.away_score ? state.home_name : state.away_name
   const loseName = state.home_score > state.away_score ? state.away_name : state.home_name
@@ -11,11 +12,27 @@ export default function Scoreboard({ state, seed }) {
         <div className={styles.period}>{state.period || 'FINAL'}</div>
         <div className={styles.row}>
           <div className={`${styles.team} ${styles.home}`}>
+            {homeId && (
+              <img
+                src={espnLogo(homeId)}
+                alt={homeId}
+                className={styles.logo}
+                onError={e => { e.currentTarget.style.opacity = '0' }}
+              />
+            )}
             <div className={styles.teamName}>{state.home_name}</div>
             <div className={styles.score}>{state.home_score}</div>
           </div>
           <div className={styles.dash}>—</div>
           <div className={`${styles.team} ${styles.away}`}>
+            {awayId && (
+              <img
+                src={espnLogo(awayId)}
+                alt={awayId}
+                className={styles.logo}
+                onError={e => { e.currentTarget.style.opacity = '0' }}
+              />
+            )}
             <div className={styles.teamName}>{state.away_name}</div>
             <div className={styles.score}>{state.away_score}</div>
           </div>

@@ -1,4 +1,5 @@
 import styles from './TeamPicker.module.css'
+import { espnLogo } from '../utils/espnLogo'
 
 export default function TeamPicker({ teams, homeId, onHomeChange, awayId, onAwayChange }) {
   return (
@@ -21,6 +22,16 @@ function TeamCard({ side, label, teams, value, onChange }) {
         {side === 'home' ? <HomeIcon /> : <PlaneIcon />}
         {label}
       </div>
+      {value && (
+        <div className={styles.logoWrap}>
+          <img
+            src={espnLogo(value)}
+            alt={value}
+            className={styles.logo}
+            onError={e => { e.currentTarget.style.opacity = '0' }}
+          />
+        </div>
+      )}
       <div className={styles.selectWrap}>
         <select
           value={value}

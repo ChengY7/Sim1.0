@@ -62,7 +62,7 @@ export default function App() {
 
       {result && (
         <>
-          <Scoreboard state={result.state} seed={result.seed} />
+          <Scoreboard state={result.state} seed={result.seed} homeId={homeId} awayId={awayId} />
           <PlayByPlay events={result.events} />
         </>
       )}

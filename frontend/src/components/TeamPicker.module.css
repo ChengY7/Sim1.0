@@ -26,6 +26,19 @@
 .home .label { color: var(--accent-home); }
 .away .label { color: var(--accent-away); }
 
+.logoWrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+.logo {
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 8px rgba(0,0,0,0.4));
+  transition: opacity 0.2s;
+}
+
 .selectWrap { position: relative; }
 .selectWrap::after {
   content: '';
