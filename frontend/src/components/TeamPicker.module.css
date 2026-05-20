@@ -1,0 +1,65 @@
+.matchup {
+  display: grid;
+  grid-template-columns: 1fr 56px 1fr;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 28px;
+}
+
+.card {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-radius: var(--r-lg);
+  padding: 22px 20px;
+  transition: border-color 0.2s;
+}
+.card:hover { border-color: rgba(255,255,255,0.14); }
+
+.label {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 11px; font-weight: 600;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.home .label { color: var(--accent-home); }
+.away .label { color: var(--accent-away); }
+
+.selectWrap { position: relative; }
+.selectWrap::after {
+  content: '';
+  position: absolute; right: 13px; top: 50%; transform: translateY(-50%);
+  width: 0; height: 0;
+  border-left: 4px solid transparent; border-right: 4px solid transparent;
+  border-top: 5px solid var(--text-muted);
+  pointer-events: none;
+}
+
+select {
+  width: 100%; appearance: none;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: var(--r-sm);
+  color: var(--text-primary);
+  font-family: inherit; font-size: 14px; font-weight: 500;
+  padding: 11px 36px 11px 13px;
+  cursor: pointer; outline: none;
+  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+}
+select:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.18); }
+select:focus { border-color: var(--accent-blue); box-shadow: 0 0 0 3px rgba(59,130,246,0.18); }
+select option { background: #1e293b; color: var(--text-primary); }
+select:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.vsCol {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+}
+.vsLine { flex: 1; width: 1px; background: var(--glass-border); min-height: 16px; }
+.vsText { font-size: 12px; font-weight: 700; color: var(--text-muted); letter-spacing: 0.06em; }
+
+@media (max-width: 580px) {
+  .matchup { grid-template-columns: 1fr; }
+  .vsCol { flex-direction: row; }
+  .vsLine { width: 24px; height: 1px; min-height: unset; }
+}

@@ -4,6 +4,7 @@
 # Go
 backend/bin/
 backend/sim
+__debug_bin*
 *.exe
 *.test
 

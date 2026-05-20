@@ -2,6 +2,16 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "Sim1.0 Frontend",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "cwd": "${workspaceFolder}/frontend",
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**"]
+    },
+    {
       "name": "Sim1.0 Server",
       "type": "go",
       "request": "launch",
@@ -13,6 +23,12 @@
         "CORS_ORIGIN": "http://localhost:3000"
       },
       "args": []
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Sim1.0 Full Stack",
+      "configurations": ["Sim1.0 Server", "Sim1.0 Frontend"]
     }
   ]
 }
