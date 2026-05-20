@@ -111,6 +111,22 @@ func TestLoad_EmptyOutcomes(t *testing.T) {
 	}
 }
 
+func TestSortedTeams(t *testing.T) {
+	b, err := config.Load()
+	if err != nil {
+		t.Fatalf("Load: %v", err)
+	}
+	teams := b.SortedTeams()
+	if len(teams) != len(b.Teams) {
+		t.Errorf("SortedTeams len = %d, want %d", len(teams), len(b.Teams))
+	}
+	for i := 1; i < len(teams); i++ {
+		if teams[i].ID < teams[i-1].ID {
+			t.Errorf("not sorted: %q before %q", teams[i-1].ID, teams[i].ID)
+		}
+	}
+}
+
 func TestTeam_UnknownID(t *testing.T) {
 	b, err := config.Load()
 	if err != nil {

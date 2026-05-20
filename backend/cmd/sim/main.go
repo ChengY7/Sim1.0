@@ -46,7 +46,9 @@ func main() {
 	expected := int(g.ExpectedTotalPossessions())
 
 	if !*quiet {
-		fmt.Printf("Sim1.0 — %s vs %s (seed %d)\n", bundle.Teams[*home].Name, bundle.Teams[*away].Name, s)
+		homeTeam, _ := bundle.Team(*home)
+		awayTeam, _ := bundle.Team(*away)
+		fmt.Printf("Sim1.0 — %s vs %s (seed %d)\n", homeTeam.Name, awayTeam.Name, s)
 		fmt.Printf("Pace %g → ~%d total possessions, ~%.1fs per possession\n\n",
 			g.Pace, expected, g.SecondsPerPossession())
 	}

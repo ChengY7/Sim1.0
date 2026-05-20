@@ -3,29 +3,36 @@ package api_test
 import (
 	"bytes"
 	"encoding/json"
+	"log"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 
 	"github.com/chengyang/sim1.0/backend/internal/api"
 	"github.com/chengyang/sim1.0/backend/internal/config"
 )
 
-func newRouter(t *testing.T) http.Handler {
-	t.Helper()
+var testRouter http.Handler
+
+func TestMain(m *testing.M) {
 	cfg, err := config.Load()
 	if err != nil {
-		t.Fatal(err)
+		log.Fatalf("config.Load: %v", err)
 	}
-	return api.NewRouter(api.NewHandlers(cfg), "http://localhost:3000")
+	testRouter = api.NewRouter(api.NewHandlers(cfg), "http://localhost:3000")
+	os.Exit(m.Run())
 }
 
 func simulate(t *testing.T, req api.SimulateRequest) *httptest.ResponseRecorder {
 	t.Helper()
-	body, _ := json.Marshal(req)
+	body, err := json.Marshal(req)
+	if err != nil {
+		t.Fatalf("marshal request: %v", err)
+	}
 	rec := httptest.NewRecorder()
 	r := httptest.NewRequest(http.MethodPost, "/simulate", bytes.NewReader(body))
-	newRouter(t).ServeHTTP(rec, r)
+	testRouter.ServeHTTP(rec, r)
 	return rec
 }
 
@@ -33,7 +40,7 @@ func simulate(t *testing.T, req api.SimulateRequest) *httptest.ResponseRecorder 
 
 func TestListTeams_OK(t *testing.T) {
 	rec := httptest.NewRecorder()
-	newRouter(t).ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/teams", nil))
+	testRouter.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/teams", nil))
 
 	if rec.Code != http.StatusOK {
 		t.Fatalf("status = %d, want 200", rec.Code)
@@ -110,7 +117,7 @@ func TestSimulate_UnknownTeam(t *testing.T) {
 func TestSimulate_InvalidJSON(t *testing.T) {
 	rec := httptest.NewRecorder()
 	r := httptest.NewRequest(http.MethodPost, "/simulate", bytes.NewBufferString("{bad json}"))
-	newRouter(t).ServeHTTP(rec, r)
+	testRouter.ServeHTTP(rec, r)
 	if rec.Code != http.StatusBadRequest {
 		t.Fatalf("status = %d, want 400", rec.Code)
 	}
