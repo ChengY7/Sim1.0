@@ -84,7 +84,14 @@ func (e *Engine) NewGame() *State {
 
 func (e *Engine) Step(s *State) Event {
 	if s.Status == "final" {
-		return Event{Type: "game_over", Text: "Game over"}
+		return Event{
+			Period:    PeriodLabel(s.Quarter, e.cfg.Game.Quarters),
+			ClockSec:  s.ClockSec,
+			Type:      "game_over",
+			Text:      "Game over",
+			HomeScore: s.HomeScore,
+			AwayScore: s.AwayScore,
+		}
 	}
 
 	s.Possession++

@@ -45,6 +45,19 @@ make swagger   # generates backend/docs/ from handler comments
 
 Edit weights to tune how often you see 2PT, 3PT, FT, turnovers, etc.
 
+## Team ratings
+
+`offense` and `defense` in `teams.json` are multipliers derived from real NBA Offensive/Defensive Ratings (points per 100 possessions), scaled to amplify differences:
+
+```
+offense = 2 × (OffRtg / 115) − 1
+defense = 2 × (115 / DefRtg) − 1
+```
+
+115 is the approximate league-average rating. The `2x − 1` transform doubles the spread around 1.0 so matchups feel meaningful. A higher `defense` value means better defense (it sits in the denominator: `mult = offense / defense`).
+
+Per possession, `mult = offense_team.offense / defense_team.defense`. Outcomes tagged `offense_scale: "up"` (makes) are multiplied by `mult`; outcomes tagged `"down"` (misses, turnovers) are divided. The practical range is roughly 0.76 (weak offense vs elite defense) to 1.25 (elite offense vs weak defense).
+
 ## Possessions per game
 
 NBA **pace** ≈ possessions per team per 48 minutes (typical ~98–102).

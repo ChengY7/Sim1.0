@@ -117,7 +117,7 @@ func TestSimulate_InvalidJSON(t *testing.T) {
 }
 
 func TestSimulate_OT(t *testing.T) {
-	seed := int64(16)
+	seed := int64(15)
 	rec := simulate(t, api.SimulateRequest{HomeTeamID: "LAL", AwayTeamID: "BOS", Seed: &seed})
 
 	var resp api.SimulateResponse
@@ -132,7 +132,7 @@ func TestSimulate_OT(t *testing.T) {
 }
 
 func TestSimulate_2OT(t *testing.T) {
-	seed := int64(241)
+	seed := int64(55)
 	rec := simulate(t, api.SimulateRequest{HomeTeamID: "LAL", AwayTeamID: "BOS", Seed: &seed})
 
 	var resp api.SimulateResponse

@@ -23,7 +23,7 @@ type GameState struct {
 	AwayName   string `json:"away_name" example:"Celtics"`
 	HomeScore  int    `json:"home_score" example:"105"`
 	AwayScore  int    `json:"away_score" example:"98"`
-	Offense    string `json:"offense,omitempty" example:"home"`
+	Offense    string `json:"offense,omitempty" example:"home"` // omitted when status is final
 	Possession int    `json:"possession" example:"201"`
 	Quarter    int    `json:"quarter" example:"4"`
 	Period     string `json:"period" example:"Q4"`
