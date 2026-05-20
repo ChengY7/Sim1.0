@@ -14,57 +14,116 @@
   border-radius: var(--r-lg);
   padding: 22px 20px;
   transition: border-color 0.2s;
+  position: relative;
 }
 .card:hover { border-color: rgba(255,255,255,0.14); }
+.cardOpen { z-index: 50; }
 
 .label {
   display: flex; align-items: center; gap: 7px;
   font-size: 11px; font-weight: 600;
   letter-spacing: 0.12em; text-transform: uppercase;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 .home .label { color: var(--accent-home); }
 .away .label { color: var(--accent-away); }
 
-.logoWrap {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 12px;
-}
-.logo {
-  width: 72px;
-  height: 72px;
-  object-fit: contain;
-  filter: drop-shadow(0 2px 8px rgba(0,0,0,0.4));
-  transition: opacity 0.2s;
-}
-
-.selectWrap { position: relative; }
-.selectWrap::after {
-  content: '';
-  position: absolute; right: 13px; top: 50%; transform: translateY(-50%);
-  width: 0; height: 0;
-  border-left: 4px solid transparent; border-right: 4px solid transparent;
-  border-top: 5px solid var(--text-muted);
-  pointer-events: none;
-}
-
-select {
-  width: 100%; appearance: none;
+/* ── Trigger button ── */
+.trigger {
+  width: 100%;
+  display: flex; align-items: center; gap: 10px;
   background: rgba(255,255,255,0.05);
   border: 1px solid rgba(255,255,255,0.1);
   border-radius: var(--r-sm);
   color: var(--text-primary);
-  font-family: inherit; font-size: 14px; font-weight: 500;
-  padding: 11px 36px 11px 13px;
+  font-family: inherit; font-size: 14px;
+  padding: 10px 12px;
   cursor: pointer; outline: none;
   transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+  text-align: left;
 }
-select:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.18); }
-select:focus { border-color: var(--accent-blue); box-shadow: 0 0 0 3px rgba(59,130,246,0.18); }
-select option { background: #1e293b; color: var(--text-primary); }
-select:disabled { opacity: 0.4; cursor: not-allowed; }
+.trigger:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.18); }
+.triggerOpen  { border-color: var(--accent-blue); box-shadow: 0 0 0 3px rgba(59,130,246,0.18); }
+.triggerDisabled { opacity: 0.4; cursor: not-allowed; }
 
+.triggerLogo {
+  width: 36px; height: 36px;
+  object-fit: contain;
+  flex-shrink: 0;
+  filter: drop-shadow(0 1px 4px rgba(0,0,0,0.4));
+  transition: opacity 0.2s;
+}
+.triggerName {
+  display: flex; flex-direction: column; gap: 1px;
+  flex: 1; min-width: 0;
+}
+.triggerAbbr {
+  font-size: 13px; font-weight: 700; line-height: 1.2;
+}
+.triggerFull {
+  font-size: 11px; color: var(--text-secondary); white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis;
+}
+.triggerPlaceholder { color: var(--text-muted); font-size: 13px; flex: 1; }
+
+.chevron {
+  color: var(--text-muted); flex-shrink: 0; margin-left: auto;
+  transition: transform 0.2s;
+}
+.chevronOpen { transform: rotate(180deg); }
+
+/* ── Dropdown list ── */
+.dropdown {
+  position: absolute; left: 0; right: 0;
+  top: calc(100% + 6px);
+  z-index: 100;
+  background: #0f1923;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: var(--r-md);
+  box-shadow: 0 16px 48px rgba(0,0,0,0.6);
+  list-style: none;
+  max-height: 280px; overflow-y: auto;
+  padding: 4px;
+  animation: dropIn 0.15s ease;
+}
+
+@keyframes dropIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.dropdown::-webkit-scrollbar { width: 4px; }
+.dropdown::-webkit-scrollbar-track { background: transparent; }
+.dropdown::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 2px; }
+
+/* ── Option row ── */
+.option {
+  display: flex; align-items: center; gap: 10px;
+  padding: 7px 10px;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  transition: background 0.1s;
+  user-select: none;
+}
+.optionFocused  { background: rgba(255,255,255,0.07); }
+.optionSelected { background: rgba(59,130,246,0.14); }
+.optionSelected .optionAbbr { color: var(--accent-blue); }
+
+.optionLogo {
+  width: 30px; height: 30px;
+  object-fit: contain; flex-shrink: 0;
+  filter: drop-shadow(0 1px 3px rgba(0,0,0,0.4));
+  transition: opacity 0.2s;
+}
+.optionAbbr {
+  font-size: 12px; font-weight: 700;
+  color: var(--text-primary); width: 34px; flex-shrink: 0;
+}
+.optionName {
+  font-size: 13px; color: var(--text-secondary);
+}
+
+/* ── VS divider ── */
 .vsCol {
   display: flex; flex-direction: column; align-items: center; gap: 4px;
 }
