@@ -15,3 +15,14 @@ export async function simulate(homeTeamId, awayTeamId) {
   if (!res.ok) throw new Error(body.error ?? `Server error ${res.status}`)
   return body
 }
+
+export async function simulateSeason() {
+  const res = await fetch('/simulate/season', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({}),
+  })
+  const body = await res.json()
+  if (!res.ok) throw new Error(body.error ?? `Server error ${res.status}`)
+  return body
+}
