@@ -2,6 +2,7 @@ package sim
 
 import (
 	"fmt"
+	"math"
 	"math/rand"
 
 	"github.com/chengyang/sim1.0/backend/internal/config"
@@ -83,18 +84,6 @@ func (e *Engine) NewGame() *State {
 }
 
 func (e *Engine) Step(s *State) Event {
-	if s.Status == "final" {
-		return Event{
-			Possession: s.Possession,
-			Period:     PeriodLabel(s.Quarter, e.cfg.Game.Quarters),
-			ClockSec:   s.ClockSec,
-			Type:       "game_over",
-			Text:       "Game over",
-			HomeScore:  s.HomeScore,
-			AwayScore:  s.AwayScore,
-		}
-	}
-
 	s.Possession++
 	offTeam, defTeam := e.teamsFor(s.Offense)
 	mult := offTeam.Offense / defTeam.Defense
@@ -132,7 +121,9 @@ func (e *Engine) Step(s *State) Event {
 	}
 
 	e.tickClock(s)
-	e.flipPossession(s)
+	if s.Status != "final" {
+		e.flipPossession(s)
+	}
 	ev.HomeScore = s.HomeScore
 	ev.AwayScore = s.AwayScore
 	return ev
@@ -190,7 +181,7 @@ func (e *Engine) flipPossession(s *State) {
 
 func (e *Engine) tickClock(s *State) {
 	g := e.cfg.Game
-	base := int(g.SecondsPerPossession())
+	base := int(math.Round(g.SecondsPerPossession()))
 	j := g.TickJitterSec
 	elapsed := base + e.rng.Intn(2*j+1) - j
 	if elapsed < 1 {

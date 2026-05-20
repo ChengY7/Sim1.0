@@ -129,6 +129,34 @@ func TestLoad_Defaults(t *testing.T) {
 	}
 }
 
+func TestLoad_InvalidOffenseScale(t *testing.T) {
+	dir := t.TempDir()
+	writeFile(t, filepath.Join(dir, "teams.json"),
+		`[{"id":"X","name":"X","offense":1.0,"defense":1.0}]`)
+	writeFile(t, filepath.Join(dir, "outcomes.json"),
+		`{"outcomes":[{"type":"make_2pt","points":2,"weight":1,"offense_scale":"diagonal"}]}`)
+	writeFile(t, filepath.Join(dir, "game.json"), `{}`)
+
+	_, err := config.LoadDir(dir)
+	if err == nil {
+		t.Fatal("expected error for invalid offense_scale")
+	}
+}
+
+func TestLoad_EmptyTeamID(t *testing.T) {
+	dir := t.TempDir()
+	writeFile(t, filepath.Join(dir, "teams.json"),
+		`[{"id":"","name":"X","offense":1.0,"defense":1.0}]`)
+	writeFile(t, filepath.Join(dir, "outcomes.json"),
+		`{"outcomes":[{"type":"make_2pt","points":2,"weight":1}]}`)
+	writeFile(t, filepath.Join(dir, "game.json"), `{}`)
+
+	_, err := config.LoadDir(dir)
+	if err == nil {
+		t.Fatal("expected error for empty team id")
+	}
+}
+
 func TestLoad_EmptyOutcomes(t *testing.T) {
 	dir := t.TempDir()
 	writeFile(t, filepath.Join(dir, "teams.json"),

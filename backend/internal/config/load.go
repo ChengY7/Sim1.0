@@ -75,7 +75,7 @@ func Load() (*Bundle, error) {
 	return load(sub)
 }
 
-// LoadDir returns a Bundle from JSON files in dir, overriding the embedded defaults.
+// LoadDir returns a Bundle from JSON files in dir (not the embedded defaults).
 func LoadDir(dir string) (*Bundle, error) {
 	return load(os.DirFS(dir))
 }
@@ -104,6 +104,9 @@ func load(fsys fs.FS) (*Bundle, error) {
 	for _, o := range of.Outcomes {
 		if o.Weight <= 0 {
 			return nil, fmt.Errorf("outcome %q: weight must be > 0, got %g", o.Type, o.Weight)
+		}
+		if o.OffenseScale != "" && o.OffenseScale != "up" && o.OffenseScale != "down" {
+			return nil, fmt.Errorf("outcome %q: offense_scale %q must be \"\", \"up\", or \"down\"", o.Type, o.OffenseScale)
 		}
 	}
 
@@ -139,6 +142,9 @@ func load(fsys fs.FS) (*Bundle, error) {
 
 	byID := make(map[string]Team, len(teams))
 	for _, t := range teams {
+		if t.ID == "" || t.Name == "" {
+			return nil, fmt.Errorf("team has empty id or name")
+		}
 		if t.Offense <= 0 || t.Defense <= 0 {
 			return nil, fmt.Errorf("team %q: offense and defense must be > 0", t.ID)
 		}
