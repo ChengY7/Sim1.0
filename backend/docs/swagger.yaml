@@ -60,6 +60,7 @@ definitions:
         example: 105
         type: integer
       offense:
+        description: omitted when status is final
         example: home
         type: string
       period:

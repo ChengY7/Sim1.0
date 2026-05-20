@@ -159,6 +159,7 @@ const docTemplate = `{
                     "example": 105
                 },
                 "offense": {
+                    "description": "omitted when status is final",
                     "type": "string",
                     "example": "home"
                 },
