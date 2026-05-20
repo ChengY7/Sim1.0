@@ -90,6 +90,12 @@ func TestLoad_Defaults(t *testing.T) {
 	if b.Game.FreeThrowsPerFoul != 2 {
 		t.Errorf("free_throws_per_foul default = %d, want 2", b.Game.FreeThrowsPerFoul)
 	}
+	if b.Game.QuarterSeconds != 720 {
+		t.Errorf("quarter_seconds default = %d, want 720", b.Game.QuarterSeconds)
+	}
+	if b.Game.TickJitterSec != 0 {
+		t.Errorf("tick_jitter_sec default = %d, want 0", b.Game.TickJitterSec)
+	}
 }
 
 func TestLoad_EmptyOutcomes(t *testing.T) {
@@ -106,15 +112,21 @@ func TestLoad_EmptyOutcomes(t *testing.T) {
 }
 
 func TestTeam_UnknownID(t *testing.T) {
-	b, _ := config.Load()
-	_, err := b.Team("FAKE")
+	b, err := config.Load()
+	if err != nil {
+		t.Fatalf("Load: %v", err)
+	}
+	_, err = b.Team("FAKE")
 	if err == nil {
 		t.Fatal("expected error for unknown team id")
 	}
 }
 
 func TestTeam_KnownID(t *testing.T) {
-	b, _ := config.Load()
+	b, err := config.Load()
+	if err != nil {
+		t.Fatalf("Load: %v", err)
+	}
 	team, err := b.Team("LAL")
 	if err != nil {
 		t.Fatalf("Team(LAL): %v", err)

@@ -160,7 +160,8 @@ func (e *Engine) pickOutcome(offenseMult float64) config.Outcome {
 			return o
 		}
 	}
-	return e.cfg.Outcomes[len(e.cfg.Outcomes)-1]
+	// unreachable: Float64 returns [0,1) so r < total always
+	panic("pickOutcome: no outcome selected — weights must be positive")
 }
 
 func (e *Engine) teamsFor(offense Side) (off, def config.Team) {

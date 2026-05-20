@@ -46,8 +46,8 @@ func TestListTeams_OK(t *testing.T) {
 		t.Error("expected at least one team")
 	}
 	for i := 1; i < len(resp.Teams); i++ {
-		if resp.Teams[i].Name < resp.Teams[i-1].Name {
-			t.Errorf("teams not sorted: %q before %q", resp.Teams[i-1].Name, resp.Teams[i].Name)
+		if resp.Teams[i].ID < resp.Teams[i-1].ID {
+			t.Errorf("teams not sorted by ID: %q before %q", resp.Teams[i-1].ID, resp.Teams[i].ID)
 		}
 	}
 }
@@ -120,9 +120,13 @@ func TestSimulate_OT(t *testing.T) {
 	seed := int64(15)
 	rec := simulate(t, api.SimulateRequest{HomeTeamID: "LAL", AwayTeamID: "BOS", Seed: &seed})
 
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200", rec.Code)
+	}
 	var resp api.SimulateResponse
-	json.NewDecoder(rec.Body).Decode(&resp)
-
+	if err := json.NewDecoder(rec.Body).Decode(&resp); err != nil {
+		t.Fatalf("decode: %v", err)
+	}
 	if resp.State.Period != "OT" {
 		t.Errorf("period = %q, want OT", resp.State.Period)
 	}
@@ -135,9 +139,13 @@ func TestSimulate_2OT(t *testing.T) {
 	seed := int64(55)
 	rec := simulate(t, api.SimulateRequest{HomeTeamID: "LAL", AwayTeamID: "BOS", Seed: &seed})
 
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200", rec.Code)
+	}
 	var resp api.SimulateResponse
-	json.NewDecoder(rec.Body).Decode(&resp)
-
+	if err := json.NewDecoder(rec.Body).Decode(&resp); err != nil {
+		t.Fatalf("decode: %v", err)
+	}
 	if resp.State.Period != "2OT" {
 		t.Errorf("period = %q, want 2OT", resp.State.Period)
 	}

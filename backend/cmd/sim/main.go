@@ -4,7 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"sort"
 	"time"
 
 	"github.com/chengyang/sim1.0/backend/internal/config"
@@ -26,7 +25,7 @@ func main() {
 	}
 
 	if *teams {
-		for _, t := range sortedTeams(bundle) {
+		for _, t := range bundle.SortedTeams() {
 			fmt.Printf("%-6s %s\n", t.ID, t.Name)
 		}
 		return
@@ -71,15 +70,6 @@ func main() {
 		state.HomeName, state.HomeScore, state.AwayScore, state.AwayName,
 		sim.PeriodLabel(state.Quarter, bundle.Game.Quarters), formatClock(state.ClockSec),
 		state.Possession, expected, state.Status)
-}
-
-func sortedTeams(b *config.Bundle) []config.Team {
-	out := make([]config.Team, 0, len(b.Teams))
-	for _, t := range b.Teams {
-		out = append(out, t)
-	}
-	sort.Slice(out, func(i, j int) bool { return out[i].ID < out[j].ID })
-	return out
 }
 
 func formatClock(sec int) string {

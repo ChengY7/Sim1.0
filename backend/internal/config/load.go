@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
+	"sort"
 )
 
 //go:embed data
@@ -152,4 +153,14 @@ func (b *Bundle) Team(id string) (Team, error) {
 		return Team{}, fmt.Errorf("unknown team id %q", id)
 	}
 	return t, nil
+}
+
+// SortedTeams returns all teams sorted by ID.
+func (b *Bundle) SortedTeams() []Team {
+	out := make([]Team, 0, len(b.Teams))
+	for _, t := range b.Teams {
+		out = append(out, t)
+	}
+	sort.Slice(out, func(i, j int) bool { return out[i].ID < out[j].ID })
+	return out
 }

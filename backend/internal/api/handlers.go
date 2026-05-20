@@ -3,7 +3,6 @@ package api
 import (
 	"encoding/json"
 	"net/http"
-	"sort"
 	"time"
 
 	"github.com/chengyang/sim1.0/backend/internal/config"
@@ -26,11 +25,11 @@ func NewHandlers(cfg *config.Bundle) *Handlers {
 // @Success      200  {object}  ListTeamsResponse
 // @Router       /teams [get]
 func (h *Handlers) ListTeams(w http.ResponseWriter, r *http.Request) {
-	opts := make([]TeamOption, 0, len(h.cfg.Teams))
-	for _, t := range h.cfg.Teams {
-		opts = append(opts, TeamOption{ID: t.ID, Name: t.Name})
+	teams := h.cfg.SortedTeams()
+	opts := make([]TeamOption, len(teams))
+	for i, t := range teams {
+		opts[i] = TeamOption{ID: t.ID, Name: t.Name}
 	}
-	sort.Slice(opts, func(i, j int) bool { return opts[i].Name < opts[j].Name })
 	writeJSON(w, http.StatusOK, ListTeamsResponse{Teams: opts})
 }
 
