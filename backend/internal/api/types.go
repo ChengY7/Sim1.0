@@ -46,8 +46,10 @@ type GameEvent struct {
 
 // TeamOption is a team entry for dropdowns.
 type TeamOption struct {
-	ID   string `json:"id" example:"LAL"`
-	Name string `json:"name" example:"Lakers"`
+	ID         string `json:"id" example:"LAL"`
+	Name       string `json:"name" example:"Lakers"`
+	Conference string `json:"conference" example:"west"`
+	Division   string `json:"division" example:"pacific"`
 }
 
 // ListTeamsResponse lists all teams from config.
@@ -86,18 +88,23 @@ type CupBracket struct {
 
 // SimulateSeasonResponse is returned after a full season simulation.
 type SimulateSeasonResponse struct {
-	Seed      int64            `json:"seed"`
-	Season    string           `json:"season"`
-	Standings []TeamSeasonStat `json:"standings"`
-	Cup       CupBracket       `json:"cup"`
+	Seed   int64            `json:"seed"`
+	Season string           `json:"season"`
+	East   []TeamSeasonStat `json:"east"`
+	West   []TeamSeasonStat `json:"west"`
+	Cup    CupBracket       `json:"cup"`
 }
 
 // TeamSeasonStat holds end-of-season stats for one team.
 type TeamSeasonStat struct {
 	TeamID     string  `json:"team_id"      example:"LAL"`
 	TeamName   string  `json:"team_name"    example:"Lakers"`
+	Conference string  `json:"conference"   example:"west"`
+	Division   string  `json:"division"     example:"pacific"`
 	W          int     `json:"w"            example:"54"`
 	L          int     `json:"l"            example:"28"`
+	ConfRecord string  `json:"conf_record"  example:"32-20"`
+	DivRecord  string  `json:"div_record"   example:"10-4"`
 	Streak     string  `json:"streak"       example:"W3"`
 	Last10     string  `json:"last_10"      example:"7-3"`
 	HomeRecord string  `json:"home_record"  example:"30-11"`

@@ -5,15 +5,16 @@ import CupBracket from './CupBracket'
 import PlayInBracket from './PlayInBracket'
 import styles from './SeasonStandings.module.css'
 
-const EAST = new Set(['ATL','BKN','BOS','CHA','CHI','CLE','DET','IND','MIA','MIL','NYK','ORL','PHI','TOR','WAS'])
-const WEST = new Set(['DAL','DEN','GSW','HOU','LAC','LAL','MEM','MIN','NOP','OKC','PHX','POR','SAC','SAS','UTA'])
-
 function zeroRow(team) {
   return {
     team_id:     team.id,
     team_name:   team.name,
+    conference:  team.conference,
+    division:    team.division,
     w:           0,
     l:           0,
+    conf_record: '0-0',
+    div_record:  '0-0',
     streak:      '—',
     last_10:     '0-0',
     home_record: '0-0',
@@ -25,26 +26,31 @@ function zeroRow(team) {
 }
 
 export default function SeasonStandings({ teams }) {
-  const [conf, setConf]               = useState('east')
-  const [standings, setStandings]     = useState(null)
-  const [cup, setCup]                 = useState(null)
-  const [playin, setPlayin]           = useState(null)
-  const [loading, setLoading]         = useState(false)
+  const [conf, setConf]                   = useState('east')
+  const [eastStandings, setEastStandings] = useState(null)
+  const [westStandings, setWestStandings] = useState(null)
+  const [cup, setCup]                     = useState(null)
+  const [playin, setPlayin]               = useState(null)
+  const [loading, setLoading]             = useState(false)
   const [playinLoading, setPlayinLoading] = useState(false)
-  const [error, setError]             = useState(null)
+  const [error, setError]                 = useState(null)
 
-  const defaultRows = useMemo(
-    () => teams.map(zeroRow).sort((a, b) => a.team_id.localeCompare(b.team_id)),
+  // Default rows derived from /teams (conference/division from API)
+  const defaultEast = useMemo(
+    () => teams.filter(t => t.conference === 'east').map(zeroRow).sort((a, b) => a.team_id.localeCompare(b.team_id)),
+    [teams]
+  )
+  const defaultWest = useMemo(
+    () => teams.filter(t => t.conference === 'west').map(zeroRow).sort((a, b) => a.team_id.localeCompare(b.team_id)),
     [teams]
   )
 
-  const rows     = standings ?? defaultRows
-  const confSet  = conf === 'east' ? EAST : WEST
-  const confRows = rows.filter(r => confSet.has(r.team_id))
+  const simulated = eastStandings !== null
+  const eastRows  = eastStandings ?? defaultEast
+  const westRows  = westStandings ?? defaultWest
+  const confRows  = conf === 'east' ? eastRows : westRows
 
-  // Seeds 7-10 per conference derived from standings (global sort preserves conf order)
-  const eastRows = useMemo(() => (standings ?? []).filter(r => EAST.has(r.team_id)), [standings])
-  const westRows = useMemo(() => (standings ?? []).filter(r => WEST.has(r.team_id)), [standings])
+  // Seeds 7-10 per conference for play-in
   const eastSeeds = { s7: eastRows[6]?.team_id, s8: eastRows[7]?.team_id, s9: eastRows[8]?.team_id, s10: eastRows[9]?.team_id }
   const westSeeds = { s7: westRows[6]?.team_id, s8: westRows[7]?.team_id, s9: westRows[8]?.team_id, s10: westRows[9]?.team_id }
 
@@ -54,7 +60,8 @@ export default function SeasonStandings({ teams }) {
     setPlayin(null)
     try {
       const data = await simulateSeason()
-      setStandings(data.standings)
+      setEastStandings(data.east)
+      setWestStandings(data.west)
       setCup(data.cup)
     } catch (err) {
       setError(err.message)
@@ -134,7 +141,7 @@ export default function SeasonStandings({ teams }) {
           playin={playin}
           onSimulate={handleSimulatePlayIn}
           loading={playinLoading}
-          seasonSimulated={standings !== null}
+          seasonSimulated={simulated}
         />
       )}
 
@@ -148,6 +155,8 @@ export default function SeasonStandings({ teams }) {
                 <th className={styles.thTeam}>Team</th>
                 <th className={styles.thNum}>W</th>
                 <th className={styles.thNum}>L</th>
+                <th className={styles.thNum}>CONF</th>
+                <th className={styles.thNum}>DIV</th>
                 <th className={styles.thNum}>Streak</th>
                 <th className={styles.thNum}>L10</th>
                 <th className={styles.thNum}>Home</th>
@@ -159,7 +168,7 @@ export default function SeasonStandings({ teams }) {
             </thead>
             <tbody>
               {confRows.map((row, i) => (
-                <StandingsRow key={row.team_id} row={row} rank={i + 1} simulated={standings !== null} />
+                <StandingsRow key={row.team_id} row={row} rank={i + 1} simulated={simulated} />
               ))}
             </tbody>
           </table>
@@ -170,10 +179,10 @@ export default function SeasonStandings({ teams }) {
 }
 
 function StandingsRow({ row, rank, simulated }) {
-  const streakWin = simulated && row.streak.startsWith('W')
+  const streakWin  = simulated && row.streak.startsWith('W')
   const streakLoss = simulated && row.streak.startsWith('L')
-  const diffPos = simulated && row.diff > 0
-  const diffNeg = simulated && row.diff < 0
+  const diffPos    = simulated && row.diff > 0
+  const diffNeg    = simulated && row.diff < 0
 
   return (
     <tr className={styles.row}>
@@ -194,6 +203,9 @@ function StandingsRow({ row, rank, simulated }) {
 
       <td className={styles.tdNum}>{row.w}</td>
       <td className={styles.tdNum}>{row.l}</td>
+
+      <td className={styles.tdNum}>{simulated ? row.conf_record : '—'}</td>
+      <td className={styles.tdNum}>{simulated ? row.div_record : '—'}</td>
 
       <td className={`${styles.tdNum} ${streakWin ? styles.win : ''} ${streakLoss ? styles.loss : ''}`}>
         {row.streak}

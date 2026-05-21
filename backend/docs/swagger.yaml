@@ -253,17 +253,27 @@ definitions:
     properties:
       cup:
         $ref: '#/definitions/internal_api.CupBracket'
+      east:
+        items:
+          $ref: '#/definitions/internal_api.TeamSeasonStat'
+        type: array
       season:
         type: string
       seed:
         type: integer
-      standings:
+      west:
         items:
           $ref: '#/definitions/internal_api.TeamSeasonStat'
         type: array
     type: object
   internal_api.TeamOption:
     properties:
+      conference:
+        example: west
+        type: string
+      division:
+        example: pacific
+        type: string
       id:
         example: LAL
         type: string
@@ -276,9 +286,21 @@ definitions:
       away_record:
         example: 24-17
         type: string
+      conf_record:
+        example: 32-20
+        type: string
+      conference:
+        example: west
+        type: string
       diff:
         example: 4.4
         type: number
+      div_record:
+        example: 10-4
+        type: string
+      division:
+        example: pacific
+        type: string
       home_record:
         example: 30-11
         type: string

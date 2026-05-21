@@ -13,10 +13,12 @@ import (
 var defaultFS embed.FS
 
 type Team struct {
-	ID      string  `json:"id"`
-	Name    string  `json:"name"`
-	Offense float64 `json:"offense"`
-	Defense float64 `json:"defense"`
+	ID         string  `json:"id"`
+	Name       string  `json:"name"`
+	Conference string  `json:"conference"` // "east" or "west"
+	Division   string  `json:"division"`   // "atlantic","central","southeast","northwest","pacific","southwest"
+	Offense    float64 `json:"offense"`
+	Defense    float64 `json:"defense"`
 }
 
 // Outcome represents one possible possession result.
@@ -179,6 +181,12 @@ func load(fsys fs.FS) (*Bundle, error) {
 		}
 		if t.Offense <= 0 || t.Defense <= 0 {
 			return nil, fmt.Errorf("team %q: offense and defense must be > 0", t.ID)
+		}
+		if t.Conference != "east" && t.Conference != "west" {
+			return nil, fmt.Errorf("team %q: conference must be \"east\" or \"west\"", t.ID)
+		}
+		if t.Division == "" {
+			return nil, fmt.Errorf("team %q: division is required", t.ID)
 		}
 		byID[t.ID] = t
 	}

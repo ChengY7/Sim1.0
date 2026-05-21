@@ -558,13 +558,19 @@ const docTemplate = `{
                 "cup": {
                     "$ref": "#/definitions/internal_api.CupBracket"
                 },
+                "east": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/internal_api.TeamSeasonStat"
+                    }
+                },
                 "season": {
                     "type": "string"
                 },
                 "seed": {
                     "type": "integer"
                 },
-                "standings": {
+                "west": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/internal_api.TeamSeasonStat"
@@ -575,6 +581,14 @@ const docTemplate = `{
         "internal_api.TeamOption": {
             "type": "object",
             "properties": {
+                "conference": {
+                    "type": "string",
+                    "example": "west"
+                },
+                "division": {
+                    "type": "string",
+                    "example": "pacific"
+                },
                 "id": {
                     "type": "string",
                     "example": "LAL"
@@ -592,9 +606,25 @@ const docTemplate = `{
                     "type": "string",
                     "example": "24-17"
                 },
+                "conf_record": {
+                    "type": "string",
+                    "example": "32-20"
+                },
+                "conference": {
+                    "type": "string",
+                    "example": "west"
+                },
                 "diff": {
                     "type": "number",
                     "example": 4.4
+                },
+                "div_record": {
+                    "type": "string",
+                    "example": "10-4"
+                },
+                "division": {
+                    "type": "string",
+                    "example": "pacific"
                 },
                 "home_record": {
                     "type": "string",

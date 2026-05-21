@@ -30,7 +30,7 @@ func (h *Handlers) ListTeams(w http.ResponseWriter, r *http.Request) {
 	teams := h.cfg.SortedTeams()
 	opts := make([]TeamOption, len(teams))
 	for i, t := range teams {
-		opts[i] = TeamOption{ID: t.ID, Name: t.Name}
+		opts[i] = TeamOption{ID: t.ID, Name: t.Name, Conference: t.Conference, Division: t.Division}
 	}
 	writeJSON(w, http.StatusOK, ListTeamsResponse{Teams: opts})
 }
@@ -103,29 +103,12 @@ func (h *Handlers) SimulateSeason(w http.ResponseWriter, r *http.Request) {
 
 	result := sim.SimulateSeason(h.cfg, seed)
 
-	// Map sim.TeamSeasonStat → api.TeamSeasonStat
-	out := make([]TeamSeasonStat, len(result.Standings))
-	for i, s := range result.Standings {
-		out[i] = TeamSeasonStat{
-			TeamID:     s.TeamID,
-			TeamName:   s.TeamName,
-			W:          s.W,
-			L:          s.L,
-			Streak:     s.Streak,
-			Last10:     s.Last10,
-			HomeRecord: s.HomeRecord,
-			AwayRecord: s.AwayRecord,
-			PPG:        s.PPG,
-			OPPG:       s.OPPG,
-			Diff:       s.Diff,
-		}
-	}
-
 	writeJSON(w, http.StatusOK, SimulateSeasonResponse{
-		Seed:      seed,
-		Season:    h.cfg.Schedule.Season,
-		Standings: out,
-		Cup:       mapCupBracket(result.Cup),
+		Seed:   seed,
+		Season: h.cfg.Schedule.Season,
+		East:   mapSeasonStats(result.East),
+		West:   mapSeasonStats(result.West),
+		Cup:    mapCupBracket(result.Cup),
 	})
 }
 
@@ -237,6 +220,30 @@ func (h *Handlers) SimulateDraftLottery(w http.ResponseWriter, r *http.Request) 
 	}
 
 	writeJSON(w, http.StatusOK, SimulateDraftLotteryResponse{Seed: seed, Picks: picks})
+}
+
+func mapSeasonStats(in []sim.TeamSeasonStat) []TeamSeasonStat {
+	out := make([]TeamSeasonStat, len(in))
+	for i, s := range in {
+		out[i] = TeamSeasonStat{
+			TeamID:     s.TeamID,
+			TeamName:   s.TeamName,
+			Conference: s.Conference,
+			Division:   s.Division,
+			W:          s.W,
+			L:          s.L,
+			ConfRecord: s.ConfRecord,
+			DivRecord:  s.DivRecord,
+			Streak:     s.Streak,
+			Last10:     s.Last10,
+			HomeRecord: s.HomeRecord,
+			AwayRecord: s.AwayRecord,
+			PPG:        s.PPG,
+			OPPG:       s.OPPG,
+			Diff:       s.Diff,
+		}
+	}
+	return out
 }
 
 func toGameState(s *sim.State, quarters int) GameState {

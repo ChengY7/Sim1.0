@@ -80,8 +80,9 @@ type CupResult struct {
 
 // SeasonResult bundles standings and cup data returned by SimulateSeason.
 type SeasonResult struct {
-	Standings []TeamSeasonStat
-	Cup       CupResult
+	East []TeamSeasonStat
+	West []TeamSeasonStat
+	Cup  CupResult
 }
 
 // ── Bracket determination ─────────────────────────────────────────────────────
@@ -201,8 +202,8 @@ func playCupGame(
 		winner = home
 	}
 	if counted {
-		records[home].record(homeWon, true, r.State.HomeScore, r.State.AwayScore)
-		records[away].record(!homeWon, false, r.State.AwayScore, r.State.HomeScore)
+		records[home].record(homeWon, true, r.State.HomeScore, r.State.AwayScore, records[away])
+		records[away].record(!homeWon, false, r.State.AwayScore, r.State.HomeScore, records[home])
 	}
 	return CupGameResult{
 		Home: home, Away: away,
@@ -339,8 +340,8 @@ func generateAndSimFlexGames(
 		eng, _ := NewEngine(cfg, h, a, rng.Int63())
 		r := eng.RunUntilFinal()
 		homeWon := r.State.HomeScore > r.State.AwayScore
-		records[h].record(homeWon, true, r.State.HomeScore, r.State.AwayScore)
-		records[a].record(!homeWon, false, r.State.AwayScore, r.State.HomeScore)
+		records[h].record(homeWon, true, r.State.HomeScore, r.State.AwayScore, records[a])
+		records[a].record(!homeWon, false, r.State.AwayScore, r.State.HomeScore, records[h])
 	}
 }
 
