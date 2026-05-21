@@ -1,78 +1,81 @@
-# Backend (v0)
+# Backend
 
-Possession-by-possession simulator using **seeded randomness** and **JSON config** — no external NBA API, no HTTP yet.
+Possession-by-possession NBA simulator using seeded randomness and JSON config.
 
 ## Run
 
-**CLI** (from `backend/`):
+**HTTP API** (default `:8080`):
+```bash
+go run ./cmd/server
+```
 
+**CLI** (single game, prints play-by-play):
 ```bash
 go run ./cmd/sim -home LAL -away BOS -seed 42
 go run ./cmd/sim -home LAL -away BOS -seed 42 -quiet   # final line only
 ```
 
-**HTTP API**:
-
-```bash
-go run ./cmd/server
-# Swagger UI: http://localhost:8080/swagger/index.html
-curl -s http://localhost:8080/teams
-curl -s -X POST http://localhost:8080/simulate \
-  -H 'Content-Type: application/json' \
-  -d '{"home_team_id":"LAL","away_team_id":"BOS","seed":42}'
-```
+## API
 
 | Method | Path | Description |
 |--------|------|-------------|
-| GET | `/teams` | All team ids from `teams.json` |
-| POST | `/simulate` | Run full game until clock ends; returns `state`, `events`, `seed` |
-| GET | `/swagger/index.html` | Interactive API docs (Swagger UI) |
+| GET | `/seasons` | Available season rating files and default season |
+| GET | `/teams` | All 30 team IDs, names, conferences, and divisions |
+| POST | `/simulate` | Simulate a single game; returns state, events, seed |
+| POST | `/simulate/season` | Simulate the full regular season; returns standings + NBA Cup bracket |
+| POST | `/simulate/playin` | Simulate the play-in tournament (6 games); returns bracket + seeds 7/8 |
+| POST | `/simulate/draft-lottery` | Run the draft lottery for 14 teams; returns picks 1–14 |
+| GET | `/swagger/index.html` | Interactive API docs |
 
-### Swagger setup
+All `POST /simulate*` endpoints accept an optional `"season"` field (e.g. `"2024-25"`). Omit it to use the default (latest) season.
 
 ```bash
-go install github.com/swaggo/swag/cmd/swag@latest
-make swagger   # generates backend/docs/ from handler comments
+# Example
+curl -s http://localhost:8080/seasons
+curl -s -X POST http://localhost:8080/simulate \
+  -H 'Content-Type: application/json' \
+  -d '{"home_team_id":"LAL","away_team_id":"BOS","seed":42,"season":"2024-25"}'
 ```
 
-## Config
+## Config files
 
 | File | Purpose |
 |------|---------|
-| `config/teams.json` | All 30 teams + simple offense/defense multipliers |
-| `config/outcomes.json` | Possession outcome types and base weights |
-| `config/game.json` | Quarters, clock, **pace** (possessions per team per 48 min) |
+| `internal/config/data/teams.json` | 30 teams — ID, name, conference, division |
+| `internal/config/data/seasons/nba_YYYY-YY.json` | Per-team offense/defense ratings for each season |
+| `internal/config/data/outcomes.json` | Possession outcome types and base weights |
+| `internal/config/data/game.json` | Quarters, clock, pace (possessions per team per 48 min) |
+| `internal/config/data/schedule.json` | Full regular-season schedule |
+| `internal/config/data/cup_groups.json` | NBA Cup group assignments |
+| `internal/config/data/draft_lottery.json` | Ball-combination counts for 14 lottery seeds |
 
-Edit weights to tune how often you see 2PT, 3PT, FT, turnovers, etc.
+### Adding a new season
 
-## Team ratings
+Create `internal/config/data/seasons/nba_YYYY-YY.json` with offense/defense multipliers for all 30 teams. The loader picks up any file matching that pattern automatically and uses the lexicographically latest as the default. See [the seasons README](internal/config/data/seasons/README.md) for the rating formula.
 
-`offense` and `defense` in `teams.json` are multipliers derived from real NBA Offensive/Defensive Ratings (points per 100 possessions), scaled to amplify differences:
+## Pace and possessions
 
-```
-offense = 2 × (OffRtg / 115) − 1
-defense = 2 × (115 / DefRtg) − 1
-```
-
-115 is the approximate league-average rating. The `2x − 1` transform doubles the spread around 1.0 so matchups feel meaningful. A higher `defense` value means better defense (it sits in the denominator: `mult = offense / defense`).
-
-Per possession, `mult = offense_team.offense / defense_team.defense`. Outcomes tagged `offense_scale: "up"` (makes) are multiplied by `mult`; outcomes tagged `"down"` (misses, turnovers) are divided. The practical range is roughly 0.76 (weak offense vs elite defense) to 1.25 (elite offense vs weak defense).
-
-## Possessions per game
-
-NBA **pace** ≈ possessions per team per 48 minutes (typical ~98–102).
+`pace` in `game.json` = offensive possessions per team per 48 minutes (NBA average ~98–102).
 
 ```
 total possessions ≈ 2 × pace
-seconds per possession ≈ (4 × 12 × 60) / (2 × pace) = 2880 / (2 × pace)
+seconds per possession ≈ (quarters × quarter_seconds) / (2 × pace)
 ```
 
-Example: `pace: 100` → ~**200** total possessions, ~**14.4s** per possession on the clock.
+Example: `pace: 100` → ~200 total possessions, ~14.4 s/possession. Actual count varies with `tick_jitter_sec`.
 
-Actual count varies slightly due to `tick_jitter_sec` in `game.json`.
+## CLI flags
 
-## Flags
+| Flag | Description |
+|------|-------------|
+| `-home` | Home team ID (e.g. `LAL`) |
+| `-away` | Away team ID (e.g. `BOS`) |
+| `-seed` | Integer seed — same seed produces the same game |
+| `-quiet` | Print only the final score line |
 
-- `-home` / `-away` — team ids from `teams.json` (e.g. `LAL`, `BOS`)
-- `-seed` — same seed ⇒ same game (useful for debugging)
-- `-quiet` — print only the final summary line
+## Swagger
+
+```bash
+go install github.com/swaggo/swag/cmd/swag@latest
+make swagger   # regenerates backend/docs/ from handler comments
+```

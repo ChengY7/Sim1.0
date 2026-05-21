@@ -1,10 +1,17 @@
 package api
 
+// ListSeasonsResponse lists available season rating files.
+type ListSeasonsResponse struct {
+	Seasons       []string `json:"seasons"`
+	DefaultSeason string   `json:"default_season"`
+}
+
 // SimulateRequest is the body for POST /simulate.
 type SimulateRequest struct {
-	HomeTeamID string `json:"home_team_id" example:"LAL"`
-	AwayTeamID string `json:"away_team_id" example:"BOS"`
-	Seed       *int64 `json:"seed,omitempty" example:"42"`
+	HomeTeamID string  `json:"home_team_id" example:"LAL"`
+	AwayTeamID string  `json:"away_team_id" example:"BOS"`
+	Seed       *int64  `json:"seed,omitempty" example:"42"`
+	Season     *string `json:"season,omitempty" example:"2024-25"`
 }
 
 // SimulateResponse is returned after a full game simulation.
@@ -59,7 +66,8 @@ type ListTeamsResponse struct {
 
 // SimulateSeasonRequest is the body for POST /simulate/season.
 type SimulateSeasonRequest struct {
-	Seed *int64 `json:"seed,omitempty" example:"42"`
+	Seed   *int64  `json:"seed,omitempty" example:"42"`
+	Season *string `json:"season,omitempty" example:"2024-25"`
 }
 
 // CupGame is the outcome of one NBA Cup knockout game.
@@ -124,9 +132,10 @@ type PlayInTeams struct {
 
 // SimulatePlayInRequest is the body for POST /simulate/playin.
 type SimulatePlayInRequest struct {
-	East PlayInTeams `json:"east"`
-	West PlayInTeams `json:"west"`
-	Seed *int64      `json:"seed,omitempty" example:"42"`
+	East   PlayInTeams `json:"east"`
+	West   PlayInTeams `json:"west"`
+	Seed   *int64      `json:"seed,omitempty" example:"42"`
+	Season *string     `json:"season,omitempty" example:"2024-25"`
 }
 
 // PlayInGame is the result of one play-in game.

@@ -1,17 +1,20 @@
 # Sim1.0
 
-Possession-by-possession NBA game simulator (Go backend + React frontend planned).
+Possession-by-possession NBA simulator — Go backend, React frontend.
 
-## Backend v0 (current)
+## Quick start
 
-CLI simulator with JSON config and seeded randomness — no external API yet.
-
+**Backend** (API on `:8080`):
 ```bash
 cd backend
-go run ./cmd/sim -home LAL -away BOS -seed 42          # CLI
-go run ./cmd/server                                      # API on :8080
+go run ./cmd/server
 ```
 
-Runs until the game clock ends (~200 possessions at default pace). See [backend/README.md](backend/README.md) for API details.
+**Frontend** (dev server on `:5173`, proxies API to `:8080`):
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
-See [backend/README.md](backend/README.md) and [docs/BACKEND_V0.md](docs/BACKEND_V0.md).
+See [backend/README.md](backend/README.md) for API reference and config details.

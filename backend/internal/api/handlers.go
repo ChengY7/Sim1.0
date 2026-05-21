@@ -11,12 +11,27 @@ import (
 	"github.com/chengyang/sim1.0/backend/internal/sim"
 )
 
+
 type Handlers struct {
 	cfg *config.Bundle
 }
 
 func NewHandlers(cfg *config.Bundle) *Handlers {
 	return &Handlers{cfg: cfg}
+}
+
+// ListSeasons godoc
+// @Summary      List available season rating files
+// @Description  Returns season identifiers that can be passed as the "season" parameter to simulate endpoints.
+// @Tags         seasons
+// @Produce      json
+// @Success      200  {object}  ListSeasonsResponse
+// @Router       /seasons [get]
+func (h *Handlers) ListSeasons(w http.ResponseWriter, r *http.Request) {
+	writeJSON(w, http.StatusOK, ListSeasonsResponse{
+		Seasons:       h.cfg.AvailableSeasons,
+		DefaultSeason: h.cfg.DefaultSeason,
+	})
 }
 
 // ListTeams godoc
@@ -66,7 +81,13 @@ func (h *Handlers) Simulate(w http.ResponseWriter, r *http.Request) {
 		seed = *req.Seed
 	}
 
-	engine, err := sim.NewEngine(h.cfg, req.HomeTeamID, req.AwayTeamID, seed)
+	cfg, err := h.cfgForSeason(req.Season)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	engine, err := sim.NewEngine(cfg, req.HomeTeamID, req.AwayTeamID, seed)
 	if err != nil {
 		writeError(w, http.StatusBadRequest, err.Error())
 		return
@@ -76,7 +97,7 @@ func (h *Handlers) Simulate(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, SimulateResponse{
 		Seed:      seed,
 		Truncated: result.Truncated,
-		State:     toGameState(result.State, h.cfg.Game.Quarters),
+		State:     toGameState(result.State, cfg.Game.Quarters),
 		Events:    toGameEvents(result.Events),
 	})
 }
@@ -101,11 +122,17 @@ func (h *Handlers) SimulateSeason(w http.ResponseWriter, r *http.Request) {
 		seed = *req.Seed
 	}
 
-	result := sim.SimulateSeason(h.cfg, seed)
+	cfg, err := h.cfgForSeason(req.Season)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	result := sim.SimulateSeason(cfg, seed)
 
 	writeJSON(w, http.StatusOK, SimulateSeasonResponse{
 		Seed:   seed,
-		Season: h.cfg.Schedule.Season,
+		Season: cfg.Schedule.Season,
 		East:   mapSeasonStats(result.East),
 		West:   mapSeasonStats(result.West),
 		Cup:    mapCupBracket(result.Cup),
@@ -149,7 +176,13 @@ func (h *Handlers) SimulatePlayIn(w http.ResponseWriter, r *http.Request) {
 		seed = *req.Seed
 	}
 
-	result := sim.SimulatePlayIn(h.cfg,
+	cfg, err := h.cfgForSeason(req.Season)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	result := sim.SimulatePlayIn(cfg,
 		sim.PlayInInput{Seed7: east.Seed7, Seed8: east.Seed8, Seed9: east.Seed9, Seed10: east.Seed10},
 		sim.PlayInInput{Seed7: west.Seed7, Seed8: west.Seed8, Seed9: west.Seed9, Seed10: west.Seed10},
 		seed,
@@ -220,6 +253,19 @@ func (h *Handlers) SimulateDraftLottery(w http.ResponseWriter, r *http.Request) 
 	}
 
 	writeJSON(w, http.StatusOK, SimulateDraftLotteryResponse{Seed: seed, Picks: picks})
+}
+
+// cfgForSeason returns the bundle with ratings for the requested season,
+// falling back to the default season if season is nil or empty.
+func (h *Handlers) cfgForSeason(season *string) (*config.Bundle, error) {
+	s := h.cfg.DefaultSeason
+	if season != nil && *season != "" {
+		s = *season
+	}
+	if s == "" {
+		return h.cfg, nil
+	}
+	return h.cfg.WithSeason(s)
 }
 
 func mapSeasonStats(in []sim.TeamSeasonStat) []TeamSeasonStat {

@@ -156,7 +156,7 @@ func TestCORSPreflight(t *testing.T) {
 }
 
 func TestSimulate_OT(t *testing.T) {
-	seed := int64(15)
+	seed := int64(80)
 	rec := simulate(t, api.SimulateRequest{HomeTeamID: "LAL", AwayTeamID: "BOS", Seed: &seed})
 
 	if rec.Code != http.StatusOK {
@@ -175,7 +175,7 @@ func TestSimulate_OT(t *testing.T) {
 }
 
 func TestSimulate_2OT(t *testing.T) {
-	seed := int64(55)
+	seed := int64(83)
 	rec := simulate(t, api.SimulateRequest{HomeTeamID: "LAL", AwayTeamID: "BOS", Seed: &seed})
 
 	if rec.Code != http.StatusOK {

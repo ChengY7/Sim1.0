@@ -7,6 +7,7 @@ import (
 	"io/fs"
 	"os"
 	"sort"
+	"strings"
 )
 
 //go:embed data
@@ -17,15 +18,29 @@ type Team struct {
 	Name       string  `json:"name"`
 	Conference string  `json:"conference"` // "east" or "west"
 	Division   string  `json:"division"`   // "atlantic","central","southeast","northwest","pacific","southwest"
-	Offense    float64 `json:"offense"`
-	Defense    float64 `json:"defense"`
+	Offense    float64 // set from season file, not from teams.json
+	Defense    float64 // set from season file, not from teams.json
+}
+
+// TeamRatings holds the per-season offensive and defensive multipliers for one team.
+type TeamRatings struct {
+	ID      string  `json:"id"`
+	Offense float64 `json:"offense"`
+	Defense float64 `json:"defense"`
+}
+
+// seasonFile is the on-disk format for a season ratings file.
+type seasonFile struct {
+	Season string        `json:"season"`
+	Teams  []TeamRatings `json:"teams"`
 }
 
 // Outcome represents one possible possession result.
 // OffenseScale controls how the outcome weight shifts with the offense/defense matchup:
-//   "up"   — good offense increases this outcome (scoring plays)
-//   "down" — good offense decreases this outcome (misses, turnovers)
-//   ""     — neutral; weight is unchanged (fouls)
+//
+//	"up"   — good offense increases this outcome (scoring plays)
+//	"down" — good offense decreases this outcome (misses, turnovers)
+//	""     — neutral; weight is unchanged (fouls)
 type Outcome struct {
 	Type         string  `json:"type"`
 	Points       int     `json:"points"`
@@ -92,12 +107,15 @@ type DraftLottery struct {
 }
 
 type Bundle struct {
-	Teams        map[string]Team
-	Outcomes     []Outcome
-	Game         Game
-	Schedule     Schedule
-	CupGroups    []CupGroup
-	DraftLottery DraftLottery
+	Teams            map[string]Team
+	Outcomes         []Outcome
+	Game             Game
+	Schedule         Schedule
+	CupGroups        []CupGroup
+	DraftLottery     DraftLottery
+	Seasons          map[string]map[string]TeamRatings // season → teamID → ratings
+	AvailableSeasons []string                          // sorted descending (newest first)
+	DefaultSeason    string
 }
 
 // Load returns a Bundle using the configs embedded at build time.
@@ -119,8 +137,13 @@ func load(fsys fs.FS) (*Bundle, error) {
 	if err != nil {
 		return nil, fmt.Errorf("read teams: %w", err)
 	}
-	var teams []Team
-	if err := json.Unmarshal(teamsData, &teams); err != nil {
+	var rawTeams []struct {
+		ID         string `json:"id"`
+		Name       string `json:"name"`
+		Conference string `json:"conference"`
+		Division   string `json:"division"`
+	}
+	if err := json.Unmarshal(teamsData, &rawTeams); err != nil {
 		return nil, fmt.Errorf("parse teams: %w", err)
 	}
 
@@ -174,13 +197,50 @@ func load(fsys fs.FS) (*Bundle, error) {
 		game.TickJitterSec = 0
 	}
 
-	byID := make(map[string]Team, len(teams))
-	for _, t := range teams {
+	// Load season rating files from seasons/.
+	seasons := map[string]map[string]TeamRatings{}
+	var availableSeasons []string
+	if entries, err := fs.ReadDir(fsys, "seasons"); err == nil {
+		for _, e := range entries {
+			name := e.Name()
+			if e.IsDir() || !strings.HasPrefix(name, "nba_") || !strings.HasSuffix(name, ".json") {
+				continue
+			}
+			data, err := fs.ReadFile(fsys, "seasons/"+name)
+			if err != nil {
+				return nil, fmt.Errorf("read season file %s: %w", name, err)
+			}
+			var sf seasonFile
+			if err := json.Unmarshal(data, &sf); err != nil {
+				return nil, fmt.Errorf("parse season file %s: %w", name, err)
+			}
+			if sf.Season == "" {
+				return nil, fmt.Errorf("season file %s: missing season field", name)
+			}
+			byTeam := make(map[string]TeamRatings, len(sf.Teams))
+			for _, r := range sf.Teams {
+				if r.Offense <= 0 || r.Defense <= 0 {
+					return nil, fmt.Errorf("season %s team %q: offense and defense must be > 0", sf.Season, r.ID)
+				}
+				byTeam[r.ID] = r
+			}
+			seasons[sf.Season] = byTeam
+			availableSeasons = append(availableSeasons, sf.Season)
+		}
+	}
+	// Sort descending so newest season is first.
+	sort.Sort(sort.Reverse(sort.StringSlice(availableSeasons)))
+
+	defaultSeason := ""
+	if len(availableSeasons) > 0 {
+		defaultSeason = availableSeasons[0]
+	}
+
+	// Validate teams and apply default season ratings.
+	byID := make(map[string]Team, len(rawTeams))
+	for _, t := range rawTeams {
 		if t.ID == "" || t.Name == "" {
 			return nil, fmt.Errorf("team has empty id or name")
-		}
-		if t.Offense <= 0 || t.Defense <= 0 {
-			return nil, fmt.Errorf("team %q: offense and defense must be > 0", t.ID)
 		}
 		if t.Conference != "east" && t.Conference != "west" {
 			return nil, fmt.Errorf("team %q: conference must be \"east\" or \"west\"", t.ID)
@@ -188,7 +248,16 @@ func load(fsys fs.FS) (*Bundle, error) {
 		if t.Division == "" {
 			return nil, fmt.Errorf("team %q: division is required", t.ID)
 		}
-		byID[t.ID] = t
+		team := Team{ID: t.ID, Name: t.Name, Conference: t.Conference, Division: t.Division}
+		if defaultSeason != "" {
+			r, ok := seasons[defaultSeason][t.ID]
+			if !ok {
+				return nil, fmt.Errorf("season %q: missing ratings for team %q", defaultSeason, t.ID)
+			}
+			team.Offense = r.Offense
+			team.Defense = r.Defense
+		}
+		byID[t.ID] = team
 	}
 
 	var schedule Schedule
@@ -197,7 +266,6 @@ func load(fsys fs.FS) (*Bundle, error) {
 			return nil, fmt.Errorf("parse schedule: %w", err)
 		}
 	}
-	// If schedule.json is absent the bundle simply has no games (tests use minimal dirs).
 
 	var cupGroups []CupGroup
 	if cgData, err := fs.ReadFile(fsys, "cup_groups.json"); err == nil {
@@ -214,13 +282,38 @@ func load(fsys fs.FS) (*Bundle, error) {
 	}
 
 	return &Bundle{
-		Teams:        byID,
-		Outcomes:     of.Outcomes,
-		Game:         game,
-		Schedule:     schedule,
-		CupGroups:    cupGroups,
-		DraftLottery: draftLottery,
+		Teams:            byID,
+		Outcomes:         of.Outcomes,
+		Game:             game,
+		Schedule:         schedule,
+		CupGroups:        cupGroups,
+		DraftLottery:     draftLottery,
+		Seasons:          seasons,
+		AvailableSeasons: availableSeasons,
+		DefaultSeason:    defaultSeason,
 	}, nil
+}
+
+// WithSeason returns a shallow copy of the Bundle with team ratings swapped to
+// the given season. Returns an error if the season is unknown.
+func (b *Bundle) WithSeason(season string) (*Bundle, error) {
+	ratings, ok := b.Seasons[season]
+	if !ok {
+		return nil, fmt.Errorf("unknown season %q", season)
+	}
+	teams := make(map[string]Team, len(b.Teams))
+	for id, t := range b.Teams {
+		r, ok := ratings[id]
+		if !ok {
+			return nil, fmt.Errorf("season %q: no ratings for team %q", season, id)
+		}
+		t.Offense = r.Offense
+		t.Defense = r.Defense
+		teams[id] = t
+	}
+	copy := *b
+	copy.Teams = teams
+	return &copy, nil
 }
 
 func (b *Bundle) Team(id string) (Team, error) {

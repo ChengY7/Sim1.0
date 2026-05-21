@@ -140,6 +140,15 @@ definitions:
         example: final
         type: string
     type: object
+  internal_api.ListSeasonsResponse:
+    properties:
+      default_season:
+        type: string
+      seasons:
+        items:
+          type: string
+        type: array
+    type: object
   internal_api.ListTeamsResponse:
     properties:
       teams:
@@ -201,6 +210,9 @@ definitions:
     properties:
       east:
         $ref: '#/definitions/internal_api.PlayInTeams'
+      season:
+        example: 2024-25
+        type: string
       seed:
         example: 42
         type: integer
@@ -224,6 +236,9 @@ definitions:
       home_team_id:
         example: LAL
         type: string
+      season:
+        example: 2024-25
+        type: string
       seed:
         example: 42
         type: integer
@@ -245,6 +260,9 @@ definitions:
     type: object
   internal_api.SimulateSeasonRequest:
     properties:
+      season:
+        example: 2024-25
+        type: string
       seed:
         example: 42
         type: integer
@@ -336,6 +354,20 @@ info:
   title: Sim1.0 API
   version: "1.0"
 paths:
+  /seasons:
+    get:
+      description: Returns season identifiers that can be passed as the "season" parameter
+        to simulate endpoints.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_api.ListSeasonsResponse'
+      summary: List available season rating files
+      tags:
+      - seasons
   /simulate:
     post:
       consumes:

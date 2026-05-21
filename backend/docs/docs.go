@@ -15,6 +15,26 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/seasons": {
+            "get": {
+                "description": "Returns season identifiers that can be passed as the \"season\" parameter to simulate endpoints.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "seasons"
+                ],
+                "summary": "List available season rating files",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_api.ListSeasonsResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/simulate": {
             "post": {
                 "description": "Runs possessions until the game clock ends. Same seed produces the same game.",
@@ -390,6 +410,20 @@ const docTemplate = `{
                 }
             }
         },
+        "internal_api.ListSeasonsResponse": {
+            "type": "object",
+            "properties": {
+                "default_season": {
+                    "type": "string"
+                },
+                "seasons": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
         "internal_api.ListTeamsResponse": {
             "type": "object",
             "properties": {
@@ -481,6 +515,10 @@ const docTemplate = `{
                 "east": {
                     "$ref": "#/definitions/internal_api.PlayInTeams"
                 },
+                "season": {
+                    "type": "string",
+                    "example": "2024-25"
+                },
                 "seed": {
                     "type": "integer",
                     "example": 42
@@ -515,6 +553,10 @@ const docTemplate = `{
                     "type": "string",
                     "example": "LAL"
                 },
+                "season": {
+                    "type": "string",
+                    "example": "2024-25"
+                },
                 "seed": {
                     "type": "integer",
                     "example": 42
@@ -546,6 +588,10 @@ const docTemplate = `{
         "internal_api.SimulateSeasonRequest": {
             "type": "object",
             "properties": {
+                "season": {
+                    "type": "string",
+                    "example": "2024-25"
+                },
                 "seed": {
                     "type": "integer",
                     "example": 42

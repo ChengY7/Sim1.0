@@ -118,7 +118,7 @@ func TestRunUntilFinal_ScoresMatchEvents(t *testing.T) {
 
 func TestRunUntilFinal_OT(t *testing.T) {
 	b := loadBundle(t)
-	r := newEngine(t, "LAL", "BOS", 15).RunUntilFinal()
+	r := newEngine(t, "LAL", "BOS", 80).RunUntilFinal()
 
 	if r.State.Quarter != b.Game.Quarters+1 {
 		t.Errorf("expected OT (quarter %d), got %d", b.Game.Quarters+1, r.State.Quarter)
@@ -166,7 +166,7 @@ func TestRunUntilFinal_Truncated(t *testing.T) {
 
 func TestRunUntilFinal_2OT(t *testing.T) {
 	b := loadBundle(t)
-	r := newEngine(t, "LAL", "BOS", 55).RunUntilFinal()
+	r := newEngine(t, "LAL", "BOS", 83).RunUntilFinal()
 
 	if r.State.Quarter != b.Game.Quarters+2 {
 		t.Errorf("expected 2OT (quarter %d), got %d", b.Game.Quarters+2, r.State.Quarter)

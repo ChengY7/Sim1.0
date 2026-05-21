@@ -8,6 +8,7 @@ import (
 
 func NewRouter(h *Handlers, corsOrigin string) http.Handler {
 	mux := http.NewServeMux()
+	mux.HandleFunc("GET /seasons", h.ListSeasons)
 	mux.HandleFunc("GET /teams", h.ListTeams)
 	mux.HandleFunc("POST /simulate", h.Simulate)
 	mux.HandleFunc("POST /simulate/season", h.SimulateSeason)

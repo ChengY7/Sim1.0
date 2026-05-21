@@ -10,10 +10,22 @@ import (
 
 func writeFile(t *testing.T, path, content string) {
 	t.Helper()
+	if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
+		t.Fatal(err)
+	}
 	if err := os.WriteFile(path, []byte(content), 0644); err != nil {
 		t.Fatal(err)
 	}
 }
+
+// minTeam is the minimal valid team entry for test fixtures.
+const minTeam = `[{"id":"X","name":"X","conference":"east","division":"atlantic"}]`
+
+// minOutcomes is a minimal valid outcomes.json.
+const minOutcomes = `{"outcomes":[{"type":"make_2pt","points":2,"weight":1}]}`
+
+// minSeason is a valid season file for a single team "X".
+const minSeason = `{"season":"2099-00","teams":[{"id":"X","offense":1.0,"defense":1.0}]}`
 
 func TestLoad_Embedded(t *testing.T) {
 	b, err := config.Load()
@@ -36,8 +48,7 @@ func TestLoad_Embedded(t *testing.T) {
 
 func TestLoad_NegativeOutcomeWeight(t *testing.T) {
 	dir := t.TempDir()
-	writeFile(t, filepath.Join(dir, "teams.json"),
-		`[{"id":"X","name":"X","offense":1.0,"defense":1.0}]`)
+	writeFile(t, filepath.Join(dir, "teams.json"), minTeam)
 	writeFile(t, filepath.Join(dir, "outcomes.json"),
 		`{"outcomes":[{"type":"make_2pt","points":2,"weight":-1}]}`)
 	writeFile(t, filepath.Join(dir, "game.json"), `{}`)
@@ -50,11 +61,10 @@ func TestLoad_NegativeOutcomeWeight(t *testing.T) {
 
 func TestLoad_InvalidFreeThrowPct(t *testing.T) {
 	dir := t.TempDir()
-	writeFile(t, filepath.Join(dir, "teams.json"),
-		`[{"id":"X","name":"X","offense":1.0,"defense":1.0}]`)
-	writeFile(t, filepath.Join(dir, "outcomes.json"),
-		`{"outcomes":[{"type":"make_2pt","points":2,"weight":1}]}`)
+	writeFile(t, filepath.Join(dir, "teams.json"), minTeam)
+	writeFile(t, filepath.Join(dir, "outcomes.json"), minOutcomes)
 	writeFile(t, filepath.Join(dir, "game.json"), `{"free_throw_pct":1.5}`)
+	writeFile(t, filepath.Join(dir, "seasons", "nba_2099-00.json"), minSeason)
 
 	b, err := config.LoadDir(dir)
 	if err != nil {
@@ -65,42 +75,40 @@ func TestLoad_InvalidFreeThrowPct(t *testing.T) {
 	}
 }
 
-func TestLoad_InvalidDefense(t *testing.T) {
+func TestLoad_InvalidSeasonDefense(t *testing.T) {
 	dir := t.TempDir()
-	writeFile(t, filepath.Join(dir, "teams.json"),
-		`[{"id":"X","name":"X","offense":1.0,"defense":0}]`)
-	writeFile(t, filepath.Join(dir, "outcomes.json"),
-		`{"outcomes":[{"type":"make_2pt","points":2,"weight":1}]}`)
+	writeFile(t, filepath.Join(dir, "teams.json"), minTeam)
+	writeFile(t, filepath.Join(dir, "outcomes.json"), minOutcomes)
 	writeFile(t, filepath.Join(dir, "game.json"), `{}`)
+	writeFile(t, filepath.Join(dir, "seasons", "nba_2099-00.json"),
+		`{"season":"2099-00","teams":[{"id":"X","offense":1.0,"defense":0}]}`)
 
 	_, err := config.LoadDir(dir)
 	if err == nil {
-		t.Fatal("expected error for zero defense")
+		t.Fatal("expected error for zero defense in season file")
 	}
 }
 
-func TestLoad_InvalidOffense(t *testing.T) {
+func TestLoad_InvalidSeasonOffense(t *testing.T) {
 	dir := t.TempDir()
-	writeFile(t, filepath.Join(dir, "teams.json"),
-		`[{"id":"X","name":"X","offense":0,"defense":1.0}]`)
-	writeFile(t, filepath.Join(dir, "outcomes.json"),
-		`{"outcomes":[{"type":"make_2pt","points":2,"weight":1}]}`)
+	writeFile(t, filepath.Join(dir, "teams.json"), minTeam)
+	writeFile(t, filepath.Join(dir, "outcomes.json"), minOutcomes)
 	writeFile(t, filepath.Join(dir, "game.json"), `{}`)
+	writeFile(t, filepath.Join(dir, "seasons", "nba_2099-00.json"),
+		`{"season":"2099-00","teams":[{"id":"X","offense":0,"defense":1.0}]}`)
 
 	_, err := config.LoadDir(dir)
 	if err == nil {
-		t.Fatal("expected error for zero offense")
+		t.Fatal("expected error for zero offense in season file")
 	}
 }
 
 func TestLoad_Defaults(t *testing.T) {
 	dir := t.TempDir()
-	writeFile(t, filepath.Join(dir, "teams.json"),
-		`[{"id":"X","name":"X","offense":1.0,"defense":1.0}]`)
-	writeFile(t, filepath.Join(dir, "outcomes.json"),
-		`{"outcomes":[{"type":"make_2pt","points":2,"weight":1}]}`)
-	// empty game.json — all fields should fall back to defaults
+	writeFile(t, filepath.Join(dir, "teams.json"), minTeam)
+	writeFile(t, filepath.Join(dir, "outcomes.json"), minOutcomes)
 	writeFile(t, filepath.Join(dir, "game.json"), `{}`)
+	writeFile(t, filepath.Join(dir, "seasons", "nba_2099-00.json"), minSeason)
 
 	b, err := config.LoadDir(dir)
 	if err != nil {
@@ -131,8 +139,7 @@ func TestLoad_Defaults(t *testing.T) {
 
 func TestLoad_InvalidOffenseScale(t *testing.T) {
 	dir := t.TempDir()
-	writeFile(t, filepath.Join(dir, "teams.json"),
-		`[{"id":"X","name":"X","offense":1.0,"defense":1.0}]`)
+	writeFile(t, filepath.Join(dir, "teams.json"), minTeam)
 	writeFile(t, filepath.Join(dir, "outcomes.json"),
 		`{"outcomes":[{"type":"make_2pt","points":2,"weight":1,"offense_scale":"diagonal"}]}`)
 	writeFile(t, filepath.Join(dir, "game.json"), `{}`)
@@ -146,9 +153,8 @@ func TestLoad_InvalidOffenseScale(t *testing.T) {
 func TestLoad_EmptyTeamID(t *testing.T) {
 	dir := t.TempDir()
 	writeFile(t, filepath.Join(dir, "teams.json"),
-		`[{"id":"","name":"X","offense":1.0,"defense":1.0}]`)
-	writeFile(t, filepath.Join(dir, "outcomes.json"),
-		`{"outcomes":[{"type":"make_2pt","points":2,"weight":1}]}`)
+		`[{"id":"","name":"X","conference":"east","division":"atlantic"}]`)
+	writeFile(t, filepath.Join(dir, "outcomes.json"), minOutcomes)
 	writeFile(t, filepath.Join(dir, "game.json"), `{}`)
 
 	_, err := config.LoadDir(dir)
@@ -159,14 +165,54 @@ func TestLoad_EmptyTeamID(t *testing.T) {
 
 func TestLoad_EmptyOutcomes(t *testing.T) {
 	dir := t.TempDir()
-	writeFile(t, filepath.Join(dir, "teams.json"),
-		`[{"id":"X","name":"X","offense":1.0,"defense":1.0}]`)
+	writeFile(t, filepath.Join(dir, "teams.json"), minTeam)
 	writeFile(t, filepath.Join(dir, "outcomes.json"), `{"outcomes":[]}`)
 	writeFile(t, filepath.Join(dir, "game.json"), `{}`)
 
 	_, err := config.LoadDir(dir)
 	if err == nil {
 		t.Fatal("expected error for empty outcomes")
+	}
+}
+
+func TestLoad_AvailableSeasons(t *testing.T) {
+	b, err := config.Load()
+	if err != nil {
+		t.Fatalf("Load: %v", err)
+	}
+	if len(b.AvailableSeasons) == 0 {
+		t.Error("expected at least one season")
+	}
+	if b.DefaultSeason == "" {
+		t.Error("expected a default season")
+	}
+	// Newest season should be first.
+	if len(b.AvailableSeasons) > 1 {
+		if b.AvailableSeasons[0] < b.AvailableSeasons[1] {
+			t.Errorf("seasons not sorted descending: %v", b.AvailableSeasons)
+		}
+	}
+}
+
+func TestLoad_WithSeason(t *testing.T) {
+	b, err := config.Load()
+	if err != nil {
+		t.Fatalf("Load: %v", err)
+	}
+	for _, s := range b.AvailableSeasons {
+		nb, err := b.WithSeason(s)
+		if err != nil {
+			t.Errorf("WithSeason(%q): %v", s, err)
+			continue
+		}
+		for _, team := range nb.Teams {
+			if team.Offense <= 0 {
+				t.Errorf("season %q team %q: offense = %g, want > 0", s, team.ID, team.Offense)
+			}
+			if team.Defense <= 0 {
+				t.Errorf("season %q team %q: defense = %g, want > 0", s, team.ID, team.Defense)
+			}
+		}
 	}
 }
 
