@@ -27,6 +27,17 @@ export async function simulateSeason() {
   return body
 }
 
+export async function simulateDraftLottery(teams) {
+  const res = await fetch('/simulate/draft-lottery', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ teams }),
+  })
+  const body = await res.json()
+  if (!res.ok) throw new Error(body.error ?? `Server error ${res.status}`)
+  return body
+}
+
 export async function simulatePlayIn(east, west) {
   const res = await fetch('/simulate/playin', {
     method: 'POST',

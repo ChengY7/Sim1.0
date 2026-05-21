@@ -3,6 +3,7 @@ import { simulateSeason, simulatePlayIn } from '../api'
 import { espnLogo } from '../utils/espnLogo'
 import CupBracket from './CupBracket'
 import PlayInBracket from './PlayInBracket'
+import DraftLottery from './DraftLottery'
 import styles from './SeasonStandings.module.css'
 
 function zeroRow(team) {
@@ -118,6 +119,12 @@ export default function SeasonStandings({ teams }) {
           >
             Play-In
           </button>
+          <button
+            className={`${styles.confTab} ${conf === 'lottery' ? styles.confTabActive : ''}`}
+            onClick={() => setConf('lottery')}
+          >
+            Draft Lottery
+          </button>
         </div>
 
         <button
@@ -145,8 +152,17 @@ export default function SeasonStandings({ teams }) {
         />
       )}
 
+      {/* Draft Lottery */}
+      {conf === 'lottery' && (
+        <DraftLottery
+          eastStandings={eastStandings}
+          westStandings={westStandings}
+          playin={playin}
+        />
+      )}
+
       {/* Standings table */}
-      {conf !== 'cup' && conf !== 'playin' && (
+      {conf !== 'cup' && conf !== 'playin' && conf !== 'lottery' && (
         <div className={styles.tableWrap}>
           <table className={styles.table}>
             <thead>
