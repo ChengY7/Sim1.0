@@ -198,6 +198,81 @@ type SimulateDraftLotteryResponse struct {
 	Picks []DraftPick `json:"picks"`
 }
 
+// PlayoffTeamInput is one seeded playoff team with regular-season record.
+type PlayoffTeamInput struct {
+	Seed    int    `json:"seed" example:"1"`
+	TeamID  string `json:"team_id" example:"BOS"`
+	SeasonW int    `json:"season_w" example:"60"`
+	SeasonL int    `json:"season_l" example:"22"`
+}
+
+// PlayoffSeriesInput is the optional partial state of one playoff series.
+// HomeTeam/AwayTeam are derived from seeding if empty.
+type PlayoffSeriesInput struct {
+	HomeTeam string `json:"home_team,omitempty" example:"BOS"`
+	AwayTeam string `json:"away_team,omitempty" example:"MIA"`
+	HomeWins int    `json:"home_wins" example:"2"`
+	AwayWins int    `json:"away_wins" example:"1"`
+}
+
+// PlayoffBracketInput is the optional partial bracket state.
+// Omit or zero-fill any series that hasn't started.
+type PlayoffBracketInput struct {
+	EastR1 [4]PlayoffSeriesInput `json:"east_r1"`
+	EastR2 [2]PlayoffSeriesInput `json:"east_r2"`
+	EastR3 PlayoffSeriesInput    `json:"east_r3"`
+	WestR1 [4]PlayoffSeriesInput `json:"west_r1"`
+	WestR2 [2]PlayoffSeriesInput `json:"west_r2"`
+	WestR3 PlayoffSeriesInput    `json:"west_r3"`
+	Finals PlayoffSeriesInput    `json:"finals"`
+}
+
+// SimulatePlayoffsRequest is the body for POST /nba/simulate/playoffs.
+type SimulatePlayoffsRequest struct {
+	East    []PlayoffTeamInput   `json:"east"`
+	West    []PlayoffTeamInput   `json:"west"`
+	Bracket *PlayoffBracketInput `json:"bracket,omitempty"`
+	Seed    *int64               `json:"seed,omitempty" example:"42"`
+	Season  *string              `json:"season,omitempty" example:"2024-25"`
+}
+
+// PlayoffGame is the result of one playoff game.
+type PlayoffGame struct {
+	GameNum   int    `json:"game_num" example:"1"`
+	Home      string `json:"home" example:"BOS"`
+	Away      string `json:"away" example:"MIA"`
+	HomeScore int    `json:"home_score" example:"105"`
+	AwayScore int    `json:"away_score" example:"98"`
+	Winner    string `json:"winner" example:"BOS"`
+}
+
+// PlayoffSeries is the result of one playoff series.
+type PlayoffSeries struct {
+	HomeTeam string        `json:"home_team" example:"BOS"`
+	AwayTeam string        `json:"away_team" example:"MIA"`
+	HomeWins int           `json:"home_wins" example:"4"`
+	AwayWins int           `json:"away_wins" example:"2"`
+	Winner   string        `json:"winner" example:"BOS"`
+	Games    []PlayoffGame `json:"games"`
+}
+
+// ConferencePlayoffBracket holds the bracket results for one conference.
+type ConferencePlayoffBracket struct {
+	R1       [4]PlayoffSeries `json:"r1"`
+	R2       [2]PlayoffSeries `json:"r2"`
+	R3       PlayoffSeries    `json:"r3"`
+	Champion string           `json:"champion" example:"BOS"`
+}
+
+// SimulatePlayoffsResponse is returned after a playoff simulation.
+type SimulatePlayoffsResponse struct {
+	Seed     int64                    `json:"seed" example:"42"`
+	East     ConferencePlayoffBracket `json:"east"`
+	West     ConferencePlayoffBracket `json:"west"`
+	Finals   PlayoffSeries            `json:"finals"`
+	Champion string                   `json:"champion" example:"BOS"`
+}
+
 // ErrorResponse is returned on 4xx errors.
 type ErrorResponse struct {
 	Error string `json:"error" example:"unknown team id"`

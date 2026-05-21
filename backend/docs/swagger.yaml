@@ -28,6 +28,22 @@ definitions:
       playoff_8:
         type: string
     type: object
+  internal_api.ConferencePlayoffBracket:
+    properties:
+      champion:
+        example: BOS
+        type: string
+      r1:
+        items:
+          $ref: '#/definitions/internal_api.PlayoffSeries'
+        type: array
+      r2:
+        items:
+          $ref: '#/definitions/internal_api.PlayoffSeries'
+        type: array
+      r3:
+        $ref: '#/definitions/internal_api.PlayoffSeries'
+    type: object
   internal_api.CupBracket:
     properties:
       east:
@@ -146,7 +162,7 @@ definitions:
         type: string
       seasons:
         items:
-          type: string
+          $ref: '#/definitions/internal_api.SeasonInfo'
         type: array
     type: object
   internal_api.ListTeamsResponse:
@@ -185,6 +201,113 @@ definitions:
       seed10:
         example: ATL
         type: string
+    type: object
+  internal_api.PlayoffBracketInput:
+    properties:
+      east_r1:
+        items:
+          $ref: '#/definitions/internal_api.PlayoffSeriesInput'
+        type: array
+      east_r2:
+        items:
+          $ref: '#/definitions/internal_api.PlayoffSeriesInput'
+        type: array
+      east_r3:
+        $ref: '#/definitions/internal_api.PlayoffSeriesInput'
+      finals:
+        $ref: '#/definitions/internal_api.PlayoffSeriesInput'
+      west_r1:
+        items:
+          $ref: '#/definitions/internal_api.PlayoffSeriesInput'
+        type: array
+      west_r2:
+        items:
+          $ref: '#/definitions/internal_api.PlayoffSeriesInput'
+        type: array
+      west_r3:
+        $ref: '#/definitions/internal_api.PlayoffSeriesInput'
+    type: object
+  internal_api.PlayoffGame:
+    properties:
+      away:
+        example: MIA
+        type: string
+      away_score:
+        example: 98
+        type: integer
+      game_num:
+        example: 1
+        type: integer
+      home:
+        example: BOS
+        type: string
+      home_score:
+        example: 105
+        type: integer
+      winner:
+        example: BOS
+        type: string
+    type: object
+  internal_api.PlayoffSeries:
+    properties:
+      away_team:
+        example: MIA
+        type: string
+      away_wins:
+        example: 2
+        type: integer
+      games:
+        items:
+          $ref: '#/definitions/internal_api.PlayoffGame'
+        type: array
+      home_team:
+        example: BOS
+        type: string
+      home_wins:
+        example: 4
+        type: integer
+      winner:
+        example: BOS
+        type: string
+    type: object
+  internal_api.PlayoffSeriesInput:
+    properties:
+      away_team:
+        example: MIA
+        type: string
+      away_wins:
+        example: 1
+        type: integer
+      home_team:
+        example: BOS
+        type: string
+      home_wins:
+        example: 2
+        type: integer
+    type: object
+  internal_api.PlayoffTeamInput:
+    properties:
+      season_l:
+        example: 22
+        type: integer
+      season_w:
+        example: 60
+        type: integer
+      seed:
+        example: 1
+        type: integer
+      team_id:
+        example: BOS
+        type: string
+    type: object
+  internal_api.SeasonInfo:
+    properties:
+      season:
+        type: string
+      standings:
+        items:
+          $ref: '#/definitions/internal_api.TeamRecord'
+        type: array
     type: object
   internal_api.SimulateDraftLotteryRequest:
     properties:
@@ -227,6 +350,40 @@ definitions:
         type: integer
       west:
         $ref: '#/definitions/internal_api.ConferencePlayIn'
+    type: object
+  internal_api.SimulatePlayoffsRequest:
+    properties:
+      bracket:
+        $ref: '#/definitions/internal_api.PlayoffBracketInput'
+      east:
+        items:
+          $ref: '#/definitions/internal_api.PlayoffTeamInput'
+        type: array
+      season:
+        example: 2024-25
+        type: string
+      seed:
+        example: 42
+        type: integer
+      west:
+        items:
+          $ref: '#/definitions/internal_api.PlayoffTeamInput'
+        type: array
+    type: object
+  internal_api.SimulatePlayoffsResponse:
+    properties:
+      champion:
+        example: BOS
+        type: string
+      east:
+        $ref: '#/definitions/internal_api.ConferencePlayoffBracket'
+      finals:
+        $ref: '#/definitions/internal_api.PlayoffSeries'
+      seed:
+        example: 42
+        type: integer
+      west:
+        $ref: '#/definitions/internal_api.ConferencePlayoffBracket'
     type: object
   internal_api.SimulateRequest:
     properties:
@@ -298,6 +455,15 @@ definitions:
       name:
         example: Lakers
         type: string
+    type: object
+  internal_api.TeamRecord:
+    properties:
+      id:
+        type: string
+      l:
+        type: integer
+      w:
+        type: integer
     type: object
   internal_api.TeamSeasonStat:
     properties:
@@ -449,6 +615,37 @@ paths:
           schema:
             $ref: '#/definitions/internal_api.ErrorResponse'
       summary: Simulate the NBA play-in tournament
+      tags:
+      - simulate
+  /nba/simulate/playoffs:
+    post:
+      consumes:
+      - application/json
+      description: Simulates all playoff series from the current bracket state to
+        the champion. Each conference seeds 1-8; matchups follow standard NBA seeding
+        (1v8, 4v5, 3v6, 2v7). Home court follows HHAAAHA schedule. Finals home court
+        goes to the team with the better regular-season record (coin flip on a tie).
+        Partially completed series are resumed from their current wins.
+      parameters:
+      - description: 16 playoff teams (8 east, 8 west) with seeds and records; optional
+          partial bracket state
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/internal_api.SimulatePlayoffsRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_api.SimulatePlayoffsResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_api.ErrorResponse'
+      summary: Simulate the NBA playoffs
       tags:
       - simulate
   /nba/simulate/season:

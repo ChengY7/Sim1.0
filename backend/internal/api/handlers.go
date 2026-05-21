@@ -266,6 +266,160 @@ func (h *Handlers) SimulateDraftLottery(w http.ResponseWriter, r *http.Request) 
 	writeJSON(w, http.StatusOK, SimulateDraftLotteryResponse{Seed: seed, Picks: picks})
 }
 
+// SimulatePlayoffs godoc
+// @Summary      Simulate the NBA playoffs
+// @Description  Simulates all playoff series from the current bracket state to the champion. Each conference seeds 1-8; matchups follow standard NBA seeding (1v8, 4v5, 3v6, 2v7). Home court follows HHAAAHA schedule. Finals home court goes to the team with the better regular-season record (coin flip on a tie). Partially completed series are resumed from their current wins.
+// @Tags         simulate
+// @Accept       json
+// @Produce      json
+// @Param        body  body      SimulatePlayoffsRequest  true  "16 playoff teams (8 east, 8 west) with seeds and records; optional partial bracket state"
+// @Success      200   {object}  SimulatePlayoffsResponse
+// @Failure      400   {object}  ErrorResponse
+// @Router       /nba/simulate/playoffs [post]
+func (h *Handlers) SimulatePlayoffs(w http.ResponseWriter, r *http.Request) {
+	r.Body = http.MaxBytesReader(w, r.Body, 16384)
+	var req SimulatePlayoffsRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeError(w, http.StatusBadRequest, "invalid JSON body")
+		return
+	}
+	if len(req.East) != 8 {
+		writeError(w, http.StatusBadRequest, "east must contain exactly 8 teams")
+		return
+	}
+	if len(req.West) != 8 {
+		writeError(w, http.StatusBadRequest, "west must contain exactly 8 teams")
+		return
+	}
+	for label, teams := range map[string][]PlayoffTeamInput{"east": req.East, "west": req.West} {
+		seen := make(map[int]bool)
+		for _, t := range teams {
+			if t.TeamID == "" {
+				writeError(w, http.StatusBadRequest, fmt.Sprintf("%s: team_id must not be empty", label))
+				return
+			}
+			if t.Seed < 1 || t.Seed > 8 {
+				writeError(w, http.StatusBadRequest, fmt.Sprintf("%s team %s: seed must be 1-8", label, t.TeamID))
+				return
+			}
+			if seen[t.Seed] {
+				writeError(w, http.StatusBadRequest, fmt.Sprintf("%s: duplicate seed %d", label, t.Seed))
+				return
+			}
+			seen[t.Seed] = true
+		}
+	}
+
+	seed := time.Now().UnixNano()
+	if req.Seed != nil {
+		seed = *req.Seed
+	}
+
+	cfg, err := h.cfgForSeason(req.Season)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	input := sim.PlayoffInput{
+		East: toSimPlayoffTeams(req.East),
+		West: toSimPlayoffTeams(req.West),
+	}
+	if req.Bracket != nil {
+		input.Bracket = toSimBracketState(req.Bracket)
+	}
+
+	result := sim.SimulatePlayoffs(cfg, input, seed)
+
+	writeJSON(w, http.StatusOK, SimulatePlayoffsResponse{
+		Seed:     seed,
+		East:     mapConferencePlayoffResult(result.East),
+		West:     mapConferencePlayoffResult(result.West),
+		Finals:   mapPlayoffSeries(result.Finals),
+		Champion: result.Champion,
+	})
+}
+
+func toSimPlayoffTeams(in []PlayoffTeamInput) [8]sim.PlayoffTeam {
+	var out [8]sim.PlayoffTeam
+	for i, t := range in {
+		out[i] = sim.PlayoffTeam{TeamID: t.TeamID, Seed: t.Seed, SeasonW: t.SeasonW, SeasonL: t.SeasonL}
+	}
+	return out
+}
+
+func toSimSeriesState(in PlayoffSeriesInput) sim.PlayoffSeriesState {
+	return sim.PlayoffSeriesState{
+		HomeTeam: in.HomeTeam,
+		AwayTeam: in.AwayTeam,
+		HomeWins: in.HomeWins,
+		AwayWins: in.AwayWins,
+	}
+}
+
+func toSimBracketState(in *PlayoffBracketInput) sim.PlayoffBracketState {
+	var out sim.PlayoffBracketState
+	for i := range in.EastR1 {
+		out.EastR1[i] = toSimSeriesState(in.EastR1[i])
+	}
+	for i := range in.EastR2 {
+		out.EastR2[i] = toSimSeriesState(in.EastR2[i])
+	}
+	out.EastR3 = toSimSeriesState(in.EastR3)
+	for i := range in.WestR1 {
+		out.WestR1[i] = toSimSeriesState(in.WestR1[i])
+	}
+	for i := range in.WestR2 {
+		out.WestR2[i] = toSimSeriesState(in.WestR2[i])
+	}
+	out.WestR3 = toSimSeriesState(in.WestR3)
+	out.Finals = toSimSeriesState(in.Finals)
+	return out
+}
+
+func mapPlayoffGame(g sim.PlayoffGameResult) PlayoffGame {
+	return PlayoffGame{
+		GameNum:   g.GameNum,
+		Home:      g.Home,
+		Away:      g.Away,
+		HomeScore: g.HomeScore,
+		AwayScore: g.AwayScore,
+		Winner:    g.Winner,
+	}
+}
+
+func mapPlayoffSeries(s sim.PlayoffSeriesResult) PlayoffSeries {
+	games := make([]PlayoffGame, len(s.Games))
+	for i, g := range s.Games {
+		games[i] = mapPlayoffGame(g)
+	}
+	return PlayoffSeries{
+		HomeTeam: s.HomeTeam,
+		AwayTeam: s.AwayTeam,
+		HomeWins: s.HomeWins,
+		AwayWins: s.AwayWins,
+		Winner:   s.Winner,
+		Games:    games,
+	}
+}
+
+func mapConferencePlayoffResult(c sim.ConferencePlayoffResult) ConferencePlayoffBracket {
+	var r1 [4]PlayoffSeries
+	for i, s := range c.R1 {
+		r1[i] = mapPlayoffSeries(s)
+	}
+	var r2 [2]PlayoffSeries
+	for i, s := range c.R2 {
+		r2[i] = mapPlayoffSeries(s)
+	}
+	return ConferencePlayoffBracket{
+		R1:       r1,
+		R2:       r2,
+		R3:       mapPlayoffSeries(c.R3),
+		Champion: c.Champion,
+	}
+}
+
 // cfgForSeason returns the bundle with ratings for the requested season,
 // falling back to the default season if season is nil or empty.
 func (h *Handlers) cfgForSeason(season *string) (*config.Bundle, error) {

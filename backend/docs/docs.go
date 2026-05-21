@@ -155,6 +155,46 @@ const docTemplate = `{
                 }
             }
         },
+        "/nba/simulate/playoffs": {
+            "post": {
+                "description": "Simulates all playoff series from the current bracket state to the champion. Each conference seeds 1-8; matchups follow standard NBA seeding (1v8, 4v5, 3v6, 2v7). Home court follows HHAAAHA schedule. Finals home court goes to the team with the better regular-season record (coin flip on a tie). Partially completed series are resumed from their current wins.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "simulate"
+                ],
+                "summary": "Simulate the NBA playoffs",
+                "parameters": [
+                    {
+                        "description": "16 playoff teams (8 east, 8 west) with seeds and records; optional partial bracket state",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_api.SimulatePlayoffsRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_api.SimulatePlayoffsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_api.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/nba/simulate/season": {
             "post": {
                 "description": "Runs every game in the 2025-26 schedule and returns standings with W, L, streak, last-10, home/away records, PPG, OPPG, and DIFF.",
@@ -249,6 +289,30 @@ const docTemplate = `{
                 },
                 "playoff_8": {
                     "type": "string"
+                }
+            }
+        },
+        "internal_api.ConferencePlayoffBracket": {
+            "type": "object",
+            "properties": {
+                "champion": {
+                    "type": "string",
+                    "example": "BOS"
+                },
+                "r1": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/internal_api.PlayoffSeries"
+                    }
+                },
+                "r2": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/internal_api.PlayoffSeries"
+                    }
+                },
+                "r3": {
+                    "$ref": "#/definitions/internal_api.PlayoffSeries"
                 }
             }
         },
@@ -419,7 +483,7 @@ const docTemplate = `{
                 "seasons": {
                     "type": "array",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/definitions/internal_api.SeasonInfo"
                     }
                 }
             }
@@ -476,6 +540,160 @@ const docTemplate = `{
                 "seed9": {
                     "type": "string",
                     "example": "CHI"
+                }
+            }
+        },
+        "internal_api.PlayoffBracketInput": {
+            "type": "object",
+            "properties": {
+                "east_r1": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/internal_api.PlayoffSeriesInput"
+                    }
+                },
+                "east_r2": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/internal_api.PlayoffSeriesInput"
+                    }
+                },
+                "east_r3": {
+                    "$ref": "#/definitions/internal_api.PlayoffSeriesInput"
+                },
+                "finals": {
+                    "$ref": "#/definitions/internal_api.PlayoffSeriesInput"
+                },
+                "west_r1": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/internal_api.PlayoffSeriesInput"
+                    }
+                },
+                "west_r2": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/internal_api.PlayoffSeriesInput"
+                    }
+                },
+                "west_r3": {
+                    "$ref": "#/definitions/internal_api.PlayoffSeriesInput"
+                }
+            }
+        },
+        "internal_api.PlayoffGame": {
+            "type": "object",
+            "properties": {
+                "away": {
+                    "type": "string",
+                    "example": "MIA"
+                },
+                "away_score": {
+                    "type": "integer",
+                    "example": 98
+                },
+                "game_num": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "home": {
+                    "type": "string",
+                    "example": "BOS"
+                },
+                "home_score": {
+                    "type": "integer",
+                    "example": 105
+                },
+                "winner": {
+                    "type": "string",
+                    "example": "BOS"
+                }
+            }
+        },
+        "internal_api.PlayoffSeries": {
+            "type": "object",
+            "properties": {
+                "away_team": {
+                    "type": "string",
+                    "example": "MIA"
+                },
+                "away_wins": {
+                    "type": "integer",
+                    "example": 2
+                },
+                "games": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/internal_api.PlayoffGame"
+                    }
+                },
+                "home_team": {
+                    "type": "string",
+                    "example": "BOS"
+                },
+                "home_wins": {
+                    "type": "integer",
+                    "example": 4
+                },
+                "winner": {
+                    "type": "string",
+                    "example": "BOS"
+                }
+            }
+        },
+        "internal_api.PlayoffSeriesInput": {
+            "type": "object",
+            "properties": {
+                "away_team": {
+                    "type": "string",
+                    "example": "MIA"
+                },
+                "away_wins": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "home_team": {
+                    "type": "string",
+                    "example": "BOS"
+                },
+                "home_wins": {
+                    "type": "integer",
+                    "example": 2
+                }
+            }
+        },
+        "internal_api.PlayoffTeamInput": {
+            "type": "object",
+            "properties": {
+                "season_l": {
+                    "type": "integer",
+                    "example": 22
+                },
+                "season_w": {
+                    "type": "integer",
+                    "example": 60
+                },
+                "seed": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "team_id": {
+                    "type": "string",
+                    "example": "BOS"
+                }
+            }
+        },
+        "internal_api.SeasonInfo": {
+            "type": "object",
+            "properties": {
+                "season": {
+                    "type": "string"
+                },
+                "standings": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/internal_api.TeamRecord"
+                    }
                 }
             }
         },
@@ -539,6 +757,56 @@ const docTemplate = `{
                 },
                 "west": {
                     "$ref": "#/definitions/internal_api.ConferencePlayIn"
+                }
+            }
+        },
+        "internal_api.SimulatePlayoffsRequest": {
+            "type": "object",
+            "properties": {
+                "bracket": {
+                    "$ref": "#/definitions/internal_api.PlayoffBracketInput"
+                },
+                "east": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/internal_api.PlayoffTeamInput"
+                    }
+                },
+                "season": {
+                    "type": "string",
+                    "example": "2024-25"
+                },
+                "seed": {
+                    "type": "integer",
+                    "example": 42
+                },
+                "west": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/internal_api.PlayoffTeamInput"
+                    }
+                }
+            }
+        },
+        "internal_api.SimulatePlayoffsResponse": {
+            "type": "object",
+            "properties": {
+                "champion": {
+                    "type": "string",
+                    "example": "BOS"
+                },
+                "east": {
+                    "$ref": "#/definitions/internal_api.ConferencePlayoffBracket"
+                },
+                "finals": {
+                    "$ref": "#/definitions/internal_api.PlayoffSeries"
+                },
+                "seed": {
+                    "type": "integer",
+                    "example": 42
+                },
+                "west": {
+                    "$ref": "#/definitions/internal_api.ConferencePlayoffBracket"
                 }
             }
         },
@@ -642,6 +910,20 @@ const docTemplate = `{
                 "name": {
                     "type": "string",
                     "example": "Lakers"
+                }
+            }
+        },
+        "internal_api.TeamRecord": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "l": {
+                    "type": "integer"
+                },
+                "w": {
+                    "type": "integer"
                 }
             }
         },
