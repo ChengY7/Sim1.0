@@ -1,7 +1,8 @@
 import { useState, useMemo } from 'react'
-import { simulateSeason } from '../api'
+import { simulateSeason, simulatePlayIn } from '../api'
 import { espnLogo } from '../utils/espnLogo'
 import CupBracket from './CupBracket'
+import PlayInBracket from './PlayInBracket'
 import styles from './SeasonStandings.module.css'
 
 const EAST = new Set(['ATL','BKN','BOS','CHA','CHI','CLE','DET','IND','MIA','MIL','NYK','ORL','PHI','TOR','WAS'])
@@ -24,25 +25,33 @@ function zeroRow(team) {
 }
 
 export default function SeasonStandings({ teams }) {
-  const [conf, setConf]           = useState('east')
-  const [standings, setStandings] = useState(null)  // null = not yet simulated
-  const [cup, setCup]             = useState(null)
-  const [loading, setLoading]     = useState(false)
-  const [error, setError]         = useState(null)
+  const [conf, setConf]               = useState('east')
+  const [standings, setStandings]     = useState(null)
+  const [cup, setCup]                 = useState(null)
+  const [playin, setPlayin]           = useState(null)
+  const [loading, setLoading]         = useState(false)
+  const [playinLoading, setPlayinLoading] = useState(false)
+  const [error, setError]             = useState(null)
 
-  // Zeroed rows sorted A-Z, shown before first simulation
   const defaultRows = useMemo(
     () => teams.map(zeroRow).sort((a, b) => a.team_id.localeCompare(b.team_id)),
     [teams]
   )
 
-  const rows      = standings ?? defaultRows
-  const confSet   = conf === 'east' ? EAST : WEST
-  const confRows  = rows.filter(r => confSet.has(r.team_id))
+  const rows     = standings ?? defaultRows
+  const confSet  = conf === 'east' ? EAST : WEST
+  const confRows = rows.filter(r => confSet.has(r.team_id))
+
+  // Seeds 7-10 per conference derived from standings (global sort preserves conf order)
+  const eastRows = useMemo(() => (standings ?? []).filter(r => EAST.has(r.team_id)), [standings])
+  const westRows = useMemo(() => (standings ?? []).filter(r => WEST.has(r.team_id)), [standings])
+  const eastSeeds = { s7: eastRows[6]?.team_id, s8: eastRows[7]?.team_id, s9: eastRows[8]?.team_id, s10: eastRows[9]?.team_id }
+  const westSeeds = { s7: westRows[6]?.team_id, s8: westRows[7]?.team_id, s9: westRows[8]?.team_id, s10: westRows[9]?.team_id }
 
   async function handleSimulate() {
     setError(null)
     setLoading(true)
+    setPlayin(null)
     try {
       const data = await simulateSeason()
       setStandings(data.standings)
@@ -51,6 +60,22 @@ export default function SeasonStandings({ teams }) {
       setError(err.message)
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function handleSimulatePlayIn() {
+    setError(null)
+    setPlayinLoading(true)
+    try {
+      const data = await simulatePlayIn(
+        { seed7: eastSeeds.s7, seed8: eastSeeds.s8, seed9: eastSeeds.s9, seed10: eastSeeds.s10 },
+        { seed7: westSeeds.s7, seed8: westSeeds.s8, seed9: westSeeds.s9, seed10: westSeeds.s10 },
+      )
+      setPlayin(data)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setPlayinLoading(false)
     }
   }
 
@@ -80,6 +105,12 @@ export default function SeasonStandings({ teams }) {
           >
             NBA Cup
           </button>
+          <button
+            className={`${styles.confTab} ${conf === 'playin' ? styles.confTabActive : ''}`}
+            onClick={() => setConf('playin')}
+          >
+            Play-In
+          </button>
         </div>
 
         <button
@@ -95,8 +126,20 @@ export default function SeasonStandings({ teams }) {
       {/* NBA Cup bracket */}
       {conf === 'cup' && <CupBracket cup={cup} />}
 
+      {/* Play-In bracket */}
+      {conf === 'playin' && (
+        <PlayInBracket
+          eastSeeds={eastSeeds}
+          westSeeds={westSeeds}
+          playin={playin}
+          onSimulate={handleSimulatePlayIn}
+          loading={playinLoading}
+          seasonSimulated={standings !== null}
+        />
+      )}
+
       {/* Standings table */}
-      {conf !== 'cup' && (
+      {conf !== 'cup' && conf !== 'playin' && (
         <div className={styles.tableWrap}>
           <table className={styles.table}>
             <thead>

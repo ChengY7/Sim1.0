@@ -1,0 +1,225 @@
+.wrap {
+  animation: fadeUp 0.3s ease;
+}
+
+/* ── Header: status note left, button right ── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.note {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.btnSim {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+  border: none; border-radius: 50px;
+  color: #fff; cursor: pointer;
+  font-family: inherit; font-size: 13px; font-weight: 600; letter-spacing: 0.03em;
+  padding: 9px 22px;
+  box-shadow: 0 4px 20px rgba(99,102,241,0.35);
+  transition: transform 0.15s, box-shadow 0.15s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.btnSim:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 28px rgba(99,102,241,0.52); }
+.btnSim:active:not(:disabled) { transform: translateY(0); }
+.btnSim:disabled { opacity: 0.55; cursor: not-allowed; }
+
+.spinner {
+  width: 15px; height: 15px;
+  border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+/* ── Two-column grid ── */
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+@media (max-width: 680px) {
+  .grid { grid-template-columns: 1fr; }
+}
+
+/* ── Conference column ── */
+.confCol {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.confHeader {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent-blue);
+}
+
+/* ── Game section ── */
+.gameSection {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.gameLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.gameName {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.gameNote {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+/* ── Game card ── */
+.card {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--r-md);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  overflow: hidden;
+}
+
+.divider {
+  height: 1px;
+  background: var(--glass-border);
+}
+
+/* ── Team rows ── */
+.row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+}
+
+.rowWon {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.rowLost {
+  opacity: 0.35;
+}
+
+.rowEmpty {
+  color: var(--text-muted);
+}
+
+.seedNum {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-muted);
+  min-width: 14px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.logo {
+  width: 22px; height: 22px;
+  object-fit: contain;
+  flex-shrink: 0;
+  filter: drop-shadow(0 1px 4px rgba(0,0,0,0.5));
+}
+
+.logoGhost {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.05);
+  border: 1px dashed rgba(255,255,255,0.1);
+  flex-shrink: 0;
+}
+
+.abbr {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  flex: 1;
+}
+
+.placeholder {
+  font-size: 11px;
+  flex: 1;
+  opacity: 0.4;
+}
+
+.score {
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  min-width: 28px;
+  text-align: right;
+  color: var(--text-secondary);
+}
+
+.dash {
+  font-size: 13px;
+  opacity: 0.2;
+  min-width: 28px;
+  text-align: right;
+}
+
+/* ── Playoff seed result ── */
+.playoffResult {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  background: rgba(59, 130, 246, 0.06);
+  border: 1px solid rgba(59, 130, 246, 0.15);
+  border-radius: var(--r-md);
+}
+
+.playoffSeedRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.playoffSeedNum {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--accent-blue);
+  min-width: 14px;
+  text-align: right;
+}
+
+.playoffLogo {
+  width: 20px; height: 20px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.playoffTeam {
+  font-size: 12px;
+  font-weight: 700;
+  flex: 1;
+}
+
+.playoffLabel {
+  font-size: 10px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}

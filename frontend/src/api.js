@@ -26,3 +26,14 @@ export async function simulateSeason() {
   if (!res.ok) throw new Error(body.error ?? `Server error ${res.status}`)
   return body
 }
+
+export async function simulatePlayIn(east, west) {
+  const res = await fetch('/simulate/playin', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ east, west }),
+  })
+  const body = await res.json()
+  if (!res.ok) throw new Error(body.error ?? `Server error ${res.status}`)
+  return body
+}
