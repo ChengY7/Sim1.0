@@ -7,7 +7,8 @@ export default defineConfig({
     port: parseInt(process.env.PORT) || 5173,
     strictPort: false,
     proxy: {
-      '/teams':   'http://localhost:8080',
+      '/seasons':  'http://localhost:8080',
+      '/teams':    'http://localhost:8080',
       '/simulate': 'http://localhost:8080',
     },
   },

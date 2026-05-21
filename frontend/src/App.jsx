@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { fetchTeams, simulate } from './api'
+import { fetchSeasons, fetchTeams, simulate } from './api'
 import TeamPicker from './components/TeamPicker'
 import Scoreboard from './components/Scoreboard'
 import PlayByPlay from './components/PlayByPlay'
@@ -7,19 +7,34 @@ import SeasonStandings from './components/SeasonStandings'
 import styles from './App.module.css'
 
 export default function App() {
-  const [mode, setMode]     = useState('game')   // 'game' | 'season'
-  const [teams, setTeams]   = useState([])
-  const [homeId, setHomeId] = useState('LAL')
-  const [awayId, setAwayId] = useState('BOS')
-  const [result, setResult] = useState(null)
+  const [mode, setMode]       = useState('game')   // 'game' | 'season'
+  const [teams, setTeams]     = useState([])
+  const [seasons, setSeasons] = useState([])
+  const [season, setSeason]   = useState(null)     // null until loaded
+  const [homeId, setHomeId]   = useState('LAL')
+  const [awayId, setAwayId]   = useState('BOS')
+  const [result, setResult]   = useState(null)
   const [loading, setLoading] = useState(false)
-  const [error, setError]   = useState(null)
+  const [error, setError]     = useState(null)
 
   useEffect(() => {
     fetchTeams()
       .then(setTeams)
       .catch(() => setError('Cannot reach the API at localhost:8080. Start the backend with: cd backend && go run ./cmd/server'))
+
+    fetchSeasons()
+      .then(({ seasons, default_season }) => {
+        setSeasons(seasons)
+        setSeason(default_season)
+      })
+      .catch(() => {}) // non-fatal — season selector just stays empty
   }, [])
+
+  function handleSeasonChange(newSeason) {
+    if (newSeason === season) return
+    setSeason(newSeason)
+    setResult(null)   // reset game sim result too
+  }
 
   async function handleSimulate() {
     if (homeId === awayId) { setError('Please select two different teams.'); return }
@@ -27,7 +42,7 @@ export default function App() {
     setResult(null)
     setLoading(true)
     try {
-      setResult(await simulate(homeId, awayId))
+      setResult(await simulate(homeId, awayId, season))
     } catch (err) {
       setError(err.message)
     } finally {
@@ -62,6 +77,7 @@ export default function App() {
             Season Sim
           </button>
         </div>
+
       </nav>
 
       {/* ── Game Sim tab ── */}
@@ -93,7 +109,28 @@ export default function App() {
 
       {/* ── Season Sim tab ── */}
       {mode === 'season' && (
-        <SeasonStandings teams={teams} />
+        <div className={styles.seasonContent}>
+          <div className={styles.seasonBar}>
+            <span className={styles.seasonLabel}>Season</span>
+            <div className={styles.seasonTabs}>
+              {seasons.length > 0
+                ? seasons.map(s => (
+                    <button
+                      key={s}
+                      className={`${styles.seasonTab} ${season === s ? styles.seasonTabActive : ''}`}
+                      onClick={() => handleSeasonChange(s)}
+                    >
+                      {s}
+                    </button>
+                  ))
+                : season
+                  ? <button className={`${styles.seasonTab} ${styles.seasonTabActive}`}>{season}</button>
+                  : <span className={styles.seasonLoading}>Loading…</span>
+              }
+            </div>
+          </div>
+          <SeasonStandings key={season ?? 'default'} teams={teams} season={season} />
+        </div>
       )}
     </div>
   )
@@ -130,3 +167,4 @@ function CalendarIcon() {
     </svg>
   )
 }
+

@@ -26,7 +26,7 @@ function zeroRow(team) {
   }
 }
 
-export default function SeasonStandings({ teams }) {
+export default function SeasonStandings({ teams, season }) {
   const [conf, setConf]                   = useState('east')
   const [eastStandings, setEastStandings] = useState(null)
   const [westStandings, setWestStandings] = useState(null)
@@ -60,7 +60,7 @@ export default function SeasonStandings({ teams }) {
     setLoading(true)
     setPlayin(null)
     try {
-      const data = await simulateSeason()
+      const data = await simulateSeason(season)
       setEastStandings(data.east)
       setWestStandings(data.west)
       setCup(data.cup)
@@ -78,6 +78,7 @@ export default function SeasonStandings({ teams }) {
       const data = await simulatePlayIn(
         { seed7: eastSeeds.s7, seed8: eastSeeds.s8, seed9: eastSeeds.s9, seed10: eastSeeds.s10 },
         { seed7: westSeeds.s7, seed8: westSeeds.s8, seed9: westSeeds.s9, seed10: westSeeds.s10 },
+        season,
       )
       setPlayin(data)
     } catch (err) {

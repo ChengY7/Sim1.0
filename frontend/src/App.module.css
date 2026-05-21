@@ -1,7 +1,7 @@
 .app {
   position: relative;
   z-index: 1;
-  max-width: 960px;
+  max-width: 1080px;
   margin: 0 auto;
   padding: 16px 20px 60px;
 }
@@ -65,6 +65,61 @@
   background: rgba(59,130,246,0.12);
   border-color: rgba(59,130,246,0.35);
   color: var(--accent-blue);
+}
+
+/* ── Season content area ── */
+.seasonContent {}
+
+/* ── Season selector bar ── */
+.seasonBar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  animation: fadeUp 0.3s ease;
+}
+
+.seasonLabel {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.seasonTabs {
+  display: flex;
+  gap: 4px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--r-md);
+  padding: 4px;
+}
+
+.seasonTab {
+  padding: 6px 18px;
+  background: transparent;
+  border: none;
+  border-radius: var(--r-sm);
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.seasonTab:hover { color: var(--text-primary); }
+.seasonTabActive {
+  background: rgba(59,130,246,0.15);
+  color: var(--accent-blue);
+}
+
+.seasonLoading {
+  font-size: 12px;
+  color: var(--text-muted);
+  padding: 6px 10px;
 }
 
 .simWrap { text-align: center; margin-bottom: 40px; }
