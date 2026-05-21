@@ -1,0 +1,8 @@
+[
+  { "name": "West A", "conference": "west", "teams": ["MIN", "OKC", "PHX", "SAC", "UTA"] },
+  { "name": "West B", "conference": "west", "teams": ["DAL", "LAC", "LAL", "MEM", "NOP"] },
+  { "name": "West C", "conference": "west", "teams": ["DEN", "GSW", "HOU", "POR", "SAS"] },
+  { "name": "East A", "conference": "east", "teams": ["ATL", "CLE", "IND", "TOR", "WAS"] },
+  { "name": "East B", "conference": "east", "teams": ["BOS", "BKN", "DET", "ORL", "PHI"] },
+  { "name": "East C", "conference": "east", "teams": ["CHA", "CHI", "MIA", "MIL", "NYK"] }
+]

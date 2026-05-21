@@ -104,6 +104,65 @@
         }
     },
     "definitions": {
+        "internal_api.ConferenceCup": {
+            "type": "object",
+            "properties": {
+                "qf": {
+                    "description": "QF[0]=1v4, QF[1]=2v3",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/internal_api.CupGame"
+                    }
+                },
+                "seeds": {
+                    "description": "index 0 = seed 1, index 3 = wildcard",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "sf": {
+                    "$ref": "#/definitions/internal_api.CupGame"
+                }
+            }
+        },
+        "internal_api.CupBracket": {
+            "type": "object",
+            "properties": {
+                "east": {
+                    "$ref": "#/definitions/internal_api.ConferenceCup"
+                },
+                "final": {
+                    "$ref": "#/definitions/internal_api.CupGame"
+                },
+                "west": {
+                    "$ref": "#/definitions/internal_api.ConferenceCup"
+                }
+            }
+        },
+        "internal_api.CupGame": {
+            "type": "object",
+            "properties": {
+                "away": {
+                    "type": "string"
+                },
+                "away_score": {
+                    "type": "integer"
+                },
+                "counted": {
+                    "type": "boolean"
+                },
+                "home": {
+                    "type": "string"
+                },
+                "home_score": {
+                    "type": "integer"
+                },
+                "winner": {
+                    "type": "string"
+                }
+            }
+        },
         "internal_api.ErrorResponse": {
             "type": "object",
             "properties": {
@@ -270,6 +329,9 @@
         "internal_api.SimulateSeasonResponse": {
             "type": "object",
             "properties": {
+                "cup": {
+                    "$ref": "#/definitions/internal_api.CupBracket"
+                },
                 "season": {
                     "type": "string"
                 },

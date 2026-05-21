@@ -100,11 +100,11 @@ func (h *Handlers) SimulateSeason(w http.ResponseWriter, r *http.Request) {
 		seed = *req.Seed
 	}
 
-	standings := sim.SimulateSeason(h.cfg, seed)
+	result := sim.SimulateSeason(h.cfg, seed)
 
 	// Map sim.TeamSeasonStat → api.TeamSeasonStat
-	out := make([]TeamSeasonStat, len(standings))
-	for i, s := range standings {
+	out := make([]TeamSeasonStat, len(result.Standings))
+	for i, s := range result.Standings {
 		out[i] = TeamSeasonStat{
 			TeamID:     s.TeamID,
 			TeamName:   s.TeamName,
@@ -124,6 +124,7 @@ func (h *Handlers) SimulateSeason(w http.ResponseWriter, r *http.Request) {
 		Seed:      seed,
 		Season:    h.cfg.Schedule.Season,
 		Standings: out,
+		Cup:       mapCupBracket(result.Cup),
 	})
 }
 
@@ -167,6 +168,33 @@ func toGameEvents(events []sim.Event) []GameEvent {
 		}
 	}
 	return out
+}
+
+func mapCupGame(g sim.CupGameResult) CupGame {
+	return CupGame{
+		Home:      g.Home,
+		Away:      g.Away,
+		HomeScore: g.HomeScore,
+		AwayScore: g.AwayScore,
+		Winner:    g.Winner,
+		Counted:   g.Counted,
+	}
+}
+
+func mapConferenceCup(c sim.ConferenceCupResult) ConferenceCup {
+	return ConferenceCup{
+		Seeds: c.Seeds,
+		QF:    [2]CupGame{mapCupGame(c.QF[0]), mapCupGame(c.QF[1])},
+		SF:    mapCupGame(c.SF),
+	}
+}
+
+func mapCupBracket(c sim.CupResult) CupBracket {
+	return CupBracket{
+		East:  mapConferenceCup(c.East),
+		West:  mapConferenceCup(c.West),
+		Final: mapCupGame(c.Final),
+	}
 }
 
 func writeJSON(w http.ResponseWriter, status int, v any) {

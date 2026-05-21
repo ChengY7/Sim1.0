@@ -60,11 +60,36 @@ type SimulateSeasonRequest struct {
 	Seed *int64 `json:"seed,omitempty" example:"42"`
 }
 
+// CupGame is the outcome of one NBA Cup knockout game.
+type CupGame struct {
+	Home      string `json:"home"`
+	Away      string `json:"away"`
+	HomeScore int    `json:"home_score"`
+	AwayScore int    `json:"away_score"`
+	Winner    string `json:"winner"`
+	Counted   bool   `json:"counted"`
+}
+
+// ConferenceCup holds the bracket and results for one conference.
+type ConferenceCup struct {
+	Seeds [4]string  `json:"seeds"` // index 0 = seed 1, index 3 = wildcard
+	QF    [2]CupGame `json:"qf"`    // QF[0]=1v4, QF[1]=2v3
+	SF    CupGame    `json:"sf"`
+}
+
+// CupBracket is the complete NBA Cup knockout result.
+type CupBracket struct {
+	East  ConferenceCup `json:"east"`
+	West  ConferenceCup `json:"west"`
+	Final CupGame       `json:"final"`
+}
+
 // SimulateSeasonResponse is returned after a full season simulation.
 type SimulateSeasonResponse struct {
 	Seed      int64            `json:"seed"`
 	Season    string           `json:"season"`
 	Standings []TeamSeasonStat `json:"standings"`
+	Cup       CupBracket       `json:"cup"`
 }
 
 // TeamSeasonStat holds end-of-season stats for one team.

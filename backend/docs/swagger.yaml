@@ -1,5 +1,44 @@
 basePath: /
 definitions:
+  internal_api.ConferenceCup:
+    properties:
+      qf:
+        description: QF[0]=1v4, QF[1]=2v3
+        items:
+          $ref: '#/definitions/internal_api.CupGame'
+        type: array
+      seeds:
+        description: index 0 = seed 1, index 3 = wildcard
+        items:
+          type: string
+        type: array
+      sf:
+        $ref: '#/definitions/internal_api.CupGame'
+    type: object
+  internal_api.CupBracket:
+    properties:
+      east:
+        $ref: '#/definitions/internal_api.ConferenceCup'
+      final:
+        $ref: '#/definitions/internal_api.CupGame'
+      west:
+        $ref: '#/definitions/internal_api.ConferenceCup'
+    type: object
+  internal_api.CupGame:
+    properties:
+      away:
+        type: string
+      away_score:
+        type: integer
+      counted:
+        type: boolean
+      home:
+        type: string
+      home_score:
+        type: integer
+      winner:
+        type: string
+    type: object
   internal_api.ErrorResponse:
     properties:
       error:
@@ -118,6 +157,8 @@ definitions:
     type: object
   internal_api.SimulateSeasonResponse:
     properties:
+      cup:
+        $ref: '#/definitions/internal_api.CupBracket'
       season:
         type: string
       seed:

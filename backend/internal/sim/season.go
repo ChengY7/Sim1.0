@@ -73,7 +73,7 @@ func (tr *teamRecord) toStat() TeamSeasonStat {
 		}
 	}
 
-	// Streak — count consecutive identical results from the end.
+	// Streak
 	if n > 0 {
 		last := tr.results[n-1]
 		count := 0
@@ -101,7 +101,7 @@ func (tr *teamRecord) toStat() TeamSeasonStat {
 	played := n - start
 	stat.Last10 = fmt.Sprintf("%d-%d", w10, played-w10)
 
-	// Scoring averages (1 decimal place)
+	// Scoring averages
 	if n > 0 {
 		stat.PPG = round1(float64(tr.totalPts) / float64(n))
 		stat.OPPG = round1(float64(tr.totalOpp) / float64(n))
@@ -115,24 +115,44 @@ func round1(v float64) float64 {
 	return math.Round(v*10) / 10
 }
 
-// SimulateSeason simulates every non-excluded game in the schedule and returns
-// standings sorted by wins (desc), then losses (asc).
-// Each game gets a deterministic seed derived from the master seed, so the
-// same master seed always produces the same season.
-func SimulateSeason(cfg *config.Bundle, seed int64) []TeamSeasonStat {
+// winCount returns the number of wins in tr.results.
+func winCount(tr *teamRecord) int {
+	n := 0
+	for _, w := range tr.results {
+		if w {
+			n++
+		}
+	}
+	return n
+}
+
+// SimulateSeason simulates the full 2025-26 regular season including the NBA Cup.
+// It returns standings sorted by wins (desc) and the complete cup bracket.
+func SimulateSeason(cfg *config.Bundle, seed int64) SeasonResult {
+	// Initialise per-team tracking.
 	records := make(map[string]*teamRecord, len(cfg.Teams))
 	for id, t := range cfg.Teams {
 		records[id] = &teamRecord{id: id, name: t.Name}
 	}
 
+	cupStats := make(map[string]*cupTeamStats, 30)
+	for _, g := range cfg.CupGroups {
+		for _, id := range g.Teams {
+			cupStats[id] = newCupStats(id, g.Name)
+		}
+	}
+
 	masterRng := rand.New(rand.NewSource(seed))
+
+	// "2025-11-28" is the date of the last NBA Cup group-stage game.
+	// We snapshot RS wins just before the first game played after that date.
+	const groupStageEnd = "2025-11-28"
+	groupSnapped := false
 
 	for _, game := range cfg.Schedule.Games {
 		if game.Excluded {
 			continue
 		}
-
-		// Skip games whose teams are not in the bundle (safety guard).
 		if _, ok := cfg.Teams[game.Home]; !ok {
 			continue
 		}
@@ -140,26 +160,57 @@ func SimulateSeason(cfg *config.Bundle, seed int64) []TeamSeasonStat {
 			continue
 		}
 
-		gameSeed := masterRng.Int63()
-		engine, err := NewEngine(cfg, game.Home, game.Away, gameSeed)
+		// Snapshot RS wins before the first post-group-stage game.
+		if !groupSnapped && game.Date > groupStageEnd {
+			for id, rec := range records {
+				if cs, ok := cupStats[id]; ok {
+					cs.rsWins = winCount(rec)
+				}
+			}
+			groupSnapped = true
+		}
+
+		eng, err := NewEngine(cfg, game.Home, game.Away, masterRng.Int63())
 		if err != nil {
 			continue
 		}
-		result := engine.RunUntilFinal()
+		res := eng.RunUntilFinal()
+		homeWon := res.State.HomeScore > res.State.AwayScore
 
-		homeScore := result.State.HomeScore
-		awayScore := result.State.AwayScore
-		homeWon := homeScore > awayScore
+		records[game.Home].record(homeWon, true, res.State.HomeScore, res.State.AwayScore)
+		records[game.Away].record(!homeWon, false, res.State.AwayScore, res.State.HomeScore)
 
-		records[game.Home].record(homeWon, true, homeScore, awayScore)
-		records[game.Away].record(!homeWon, false, awayScore, homeScore)
+		// Track cup group-stage stats for bracket determination.
+		if game.NbaCup {
+			if cs, ok := cupStats[game.Home]; ok {
+				cs.addResult(homeWon, res.State.HomeScore, res.State.AwayScore, game.Away)
+			}
+			if cs, ok := cupStats[game.Away]; ok {
+				cs.addResult(!homeWon, res.State.AwayScore, res.State.HomeScore, game.Home)
+			}
+		}
 	}
 
+	// Fallback: if schedule ended before the cutoff date.
+	if !groupSnapped {
+		for id, rec := range records {
+			if cs, ok := cupStats[id]; ok {
+				cs.rsWins = winCount(rec)
+			}
+		}
+	}
+
+	// Simulate NBA Cup knockout bracket.
+	cup := runCup(cfg, cupStats, records, masterRng)
+
+	// Generate and simulate flex games to reach 41H / 41A per team.
+	generateAndSimFlexGames(cfg, records, masterRng)
+
+	// Build final standings.
 	stats := make([]TeamSeasonStat, 0, len(records))
 	for _, tr := range records {
 		stats = append(stats, tr.toStat())
 	}
-
 	sort.Slice(stats, func(i, j int) bool {
 		if stats[i].W != stats[j].W {
 			return stats[i].W > stats[j].W
@@ -167,5 +218,5 @@ func SimulateSeason(cfg *config.Bundle, seed int64) []TeamSeasonStat {
 		return stats[i].L < stats[j].L
 	})
 
-	return stats
+	return SeasonResult{Standings: stats, Cup: cup}
 }

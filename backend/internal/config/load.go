@@ -60,6 +60,13 @@ func (g Game) SecondsPerPossession() float64 {
 	return g.gameSeconds() / g.ExpectedTotalPossessions()
 }
 
+// CupGroup defines one NBA Cup group-stage group.
+type CupGroup struct {
+	Name       string   `json:"name"`
+	Conference string   `json:"conference"`
+	Teams      []string `json:"teams"`
+}
+
 // ScheduleGame is one regular-season game from schedule.json.
 type ScheduleGame struct {
 	Date     string `json:"date"`
@@ -77,10 +84,11 @@ type Schedule struct {
 }
 
 type Bundle struct {
-	Teams    map[string]Team
-	Outcomes []Outcome
-	Game     Game
-	Schedule Schedule
+	Teams     map[string]Team
+	Outcomes  []Outcome
+	Game      Game
+	Schedule  Schedule
+	CupGroups []CupGroup
 }
 
 // Load returns a Bundle using the configs embedded at build time.
@@ -176,11 +184,19 @@ func load(fsys fs.FS) (*Bundle, error) {
 	}
 	// If schedule.json is absent the bundle simply has no games (tests use minimal dirs).
 
+	var cupGroups []CupGroup
+	if cgData, err := fs.ReadFile(fsys, "cup_groups.json"); err == nil {
+		if err := json.Unmarshal(cgData, &cupGroups); err != nil {
+			return nil, fmt.Errorf("parse cup_groups: %w", err)
+		}
+	}
+
 	return &Bundle{
-		Teams:    byID,
-		Outcomes: of.Outcomes,
-		Game:     game,
-		Schedule: schedule,
+		Teams:     byID,
+		Outcomes:  of.Outcomes,
+		Game:      game,
+		Schedule:  schedule,
+		CupGroups: cupGroups,
 	}, nil
 }
 
