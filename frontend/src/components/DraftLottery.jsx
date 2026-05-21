@@ -39,6 +39,7 @@ export default function DraftLottery({ eastStandings, westStandings, playin }) {
   const [lotteryResult, setLotteryResult] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  const [subTab, setSubTab] = useState('odds')
 
   // Build team lookup: teamId → season stat row
   const teamMap = useMemo(() => {
@@ -101,6 +102,7 @@ export default function DraftLottery({ eastStandings, westStandings, playin }) {
       const teams = lotterySeeds.map(s => s.teamId)
       const data = await simulateDraftLottery(teams)
       setLotteryResult(data)
+      setSubTab('results')
     } catch (err) {
       setError(err.message)
     } finally {
@@ -121,18 +123,34 @@ export default function DraftLottery({ eastStandings, westStandings, playin }) {
       {error && <div className={styles.errorBox}>{error}</div>}
 
       <div className={styles.header}>
+        <div className={styles.subTabs}>
+          <button
+            className={`${styles.subTab} ${subTab === 'odds' ? styles.subTabActive : ''}`}
+            onClick={() => setSubTab('odds')}
+          >
+            Odds
+          </button>
+          <button
+            className={`${styles.subTab} ${subTab === 'results' ? styles.subTabActive : ''} ${!lotteryResult ? styles.subTabDisabled : ''}`}
+            onClick={() => lotteryResult && setSubTab('results')}
+          >
+            Results
+          </button>
+        </div>
         <span className={styles.note}>{note}</span>
-        <button
-          className={styles.btnSim}
-          disabled={!canSimulate || loading}
-          onClick={handleSimulate}
-        >
-          {loading ? <span className={styles.spinner} /> : <BallIcon />}
-          <span>{loading ? 'Drawing…' : 'Simulate Lottery'}</span>
-        </button>
+        <div className={styles.headerRight}>
+          <button
+            className={styles.btnSim}
+            disabled={!canSimulate || loading}
+            onClick={handleSimulate}
+          >
+            {loading ? <span className={styles.spinner} /> : <BallIcon />}
+            <span>{loading ? 'Drawing…' : 'Simulate Lottery'}</span>
+          </button>
+        </div>
       </div>
 
-      {lotteryResult ? (
+      {subTab === 'results' && lotteryResult ? (
         <ResultsTable picks={lotteryResult.picks} teamMap={teamMap} />
       ) : (
         <OddsTable seeds={lotterySeeds} seasonSimulated={seasonSimulated} />
