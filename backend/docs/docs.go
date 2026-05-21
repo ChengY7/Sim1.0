@@ -95,6 +95,46 @@ const docTemplate = `{
                 }
             }
         },
+        "/simulate/playin": {
+            "post": {
+                "description": "Runs all 6 play-in games (3 per conference). Game 1: 7 hosts 8 — winner = 7 seed. Game 2: 9 hosts 10. Game 3: loser of G1 hosts winner of G2 — winner = 8 seed.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "simulate"
+                ],
+                "summary": "Simulate the NBA play-in tournament",
+                "parameters": [
+                    {
+                        "description": "Play-in team IDs for each conference",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_api.SimulatePlayInRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_api.SimulatePlayInResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_api.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/simulate/season": {
             "post": {
                 "description": "Runs every game in the 2025-26 schedule and returns standings with W, L, streak, last-10, home/away records, PPG, OPPG, and DIFF.",
@@ -169,6 +209,26 @@ const docTemplate = `{
                 },
                 "sf": {
                     "$ref": "#/definitions/internal_api.CupGame"
+                }
+            }
+        },
+        "internal_api.ConferencePlayIn": {
+            "type": "object",
+            "properties": {
+                "game1": {
+                    "$ref": "#/definitions/internal_api.PlayInGame"
+                },
+                "game2": {
+                    "$ref": "#/definitions/internal_api.PlayInGame"
+                },
+                "game3": {
+                    "$ref": "#/definitions/internal_api.PlayInGame"
+                },
+                "playoff_7": {
+                    "type": "string"
+                },
+                "playoff_8": {
+                    "type": "string"
                 }
             }
         },
@@ -341,6 +401,50 @@ const docTemplate = `{
                 }
             }
         },
+        "internal_api.PlayInGame": {
+            "type": "object",
+            "properties": {
+                "away": {
+                    "type": "string"
+                },
+                "away_score": {
+                    "type": "integer"
+                },
+                "home": {
+                    "type": "string"
+                },
+                "home_score": {
+                    "type": "integer"
+                },
+                "loser": {
+                    "type": "string"
+                },
+                "winner": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_api.PlayInTeams": {
+            "type": "object",
+            "properties": {
+                "seed10": {
+                    "type": "string",
+                    "example": "ATL"
+                },
+                "seed7": {
+                    "type": "string",
+                    "example": "MIL"
+                },
+                "seed8": {
+                    "type": "string",
+                    "example": "MIA"
+                },
+                "seed9": {
+                    "type": "string",
+                    "example": "CHI"
+                }
+            }
+        },
         "internal_api.SimulateDraftLotteryRequest": {
             "type": "object",
             "properties": {
@@ -368,6 +472,35 @@ const docTemplate = `{
                 "seed": {
                     "type": "integer",
                     "example": 42
+                }
+            }
+        },
+        "internal_api.SimulatePlayInRequest": {
+            "type": "object",
+            "properties": {
+                "east": {
+                    "$ref": "#/definitions/internal_api.PlayInTeams"
+                },
+                "seed": {
+                    "type": "integer",
+                    "example": 42
+                },
+                "west": {
+                    "$ref": "#/definitions/internal_api.PlayInTeams"
+                }
+            }
+        },
+        "internal_api.SimulatePlayInResponse": {
+            "type": "object",
+            "properties": {
+                "east": {
+                    "$ref": "#/definitions/internal_api.ConferencePlayIn"
+                },
+                "seed": {
+                    "type": "integer"
+                },
+                "west": {
+                    "$ref": "#/definitions/internal_api.ConferencePlayIn"
                 }
             }
         },

@@ -107,6 +107,47 @@ type TeamSeasonStat struct {
 	Diff       float64 `json:"diff"         example:"4.4"`
 }
 
+// PlayInTeams holds the four play-in team IDs for one conference.
+type PlayInTeams struct {
+	Seed7  string `json:"seed7" example:"MIL"`
+	Seed8  string `json:"seed8" example:"MIA"`
+	Seed9  string `json:"seed9" example:"CHI"`
+	Seed10 string `json:"seed10" example:"ATL"`
+}
+
+// SimulatePlayInRequest is the body for POST /simulate/playin.
+type SimulatePlayInRequest struct {
+	East PlayInTeams `json:"east"`
+	West PlayInTeams `json:"west"`
+	Seed *int64      `json:"seed,omitempty" example:"42"`
+}
+
+// PlayInGame is the result of one play-in game.
+type PlayInGame struct {
+	Home      string `json:"home"`
+	Away      string `json:"away"`
+	HomeScore int    `json:"home_score"`
+	AwayScore int    `json:"away_score"`
+	Winner    string `json:"winner"`
+	Loser     string `json:"loser"`
+}
+
+// ConferencePlayIn holds the three play-in games and playoff seeds for one conference.
+type ConferencePlayIn struct {
+	Game1    PlayInGame `json:"game1"`
+	Game2    PlayInGame `json:"game2"`
+	Game3    PlayInGame `json:"game3"`
+	Playoff7 string     `json:"playoff_7"`
+	Playoff8 string     `json:"playoff_8"`
+}
+
+// SimulatePlayInResponse is returned after a play-in simulation.
+type SimulatePlayInResponse struct {
+	Seed int64            `json:"seed"`
+	East ConferencePlayIn `json:"east"`
+	West ConferencePlayIn `json:"west"`
+}
+
 // SimulateDraftLotteryRequest is the body for POST /simulate/draft-lottery.
 // Teams must contain exactly 14 team IDs ordered by lottery seed:
 // index 0 = seed 1 (worst record), index 13 = seed 14.

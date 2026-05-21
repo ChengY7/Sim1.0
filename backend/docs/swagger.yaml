@@ -15,6 +15,19 @@ definitions:
       sf:
         $ref: '#/definitions/internal_api.CupGame'
     type: object
+  internal_api.ConferencePlayIn:
+    properties:
+      game1:
+        $ref: '#/definitions/internal_api.PlayInGame'
+      game2:
+        $ref: '#/definitions/internal_api.PlayInGame'
+      game3:
+        $ref: '#/definitions/internal_api.PlayInGame'
+      playoff_7:
+        type: string
+      playoff_8:
+        type: string
+    type: object
   internal_api.CupBracket:
     properties:
       east:
@@ -134,6 +147,36 @@ definitions:
           $ref: '#/definitions/internal_api.TeamOption'
         type: array
     type: object
+  internal_api.PlayInGame:
+    properties:
+      away:
+        type: string
+      away_score:
+        type: integer
+      home:
+        type: string
+      home_score:
+        type: integer
+      loser:
+        type: string
+      winner:
+        type: string
+    type: object
+  internal_api.PlayInTeams:
+    properties:
+      seed7:
+        example: MIL
+        type: string
+      seed8:
+        example: MIA
+        type: string
+      seed9:
+        example: CHI
+        type: string
+      seed10:
+        example: ATL
+        type: string
+    type: object
   internal_api.SimulateDraftLotteryRequest:
     properties:
       seed:
@@ -153,6 +196,25 @@ definitions:
       seed:
         example: 42
         type: integer
+    type: object
+  internal_api.SimulatePlayInRequest:
+    properties:
+      east:
+        $ref: '#/definitions/internal_api.PlayInTeams'
+      seed:
+        example: 42
+        type: integer
+      west:
+        $ref: '#/definitions/internal_api.PlayInTeams'
+    type: object
+  internal_api.SimulatePlayInResponse:
+    properties:
+      east:
+        $ref: '#/definitions/internal_api.ConferencePlayIn'
+      seed:
+        type: integer
+      west:
+        $ref: '#/definitions/internal_api.ConferencePlayIn'
     type: object
   internal_api.SimulateRequest:
     properties:
@@ -305,6 +367,34 @@ paths:
           schema:
             $ref: '#/definitions/internal_api.ErrorResponse'
       summary: Simulate the NBA draft lottery
+      tags:
+      - simulate
+  /simulate/playin:
+    post:
+      consumes:
+      - application/json
+      description: 'Runs all 6 play-in games (3 per conference). Game 1: 7 hosts 8
+        — winner = 7 seed. Game 2: 9 hosts 10. Game 3: loser of G1 hosts winner of
+        G2 — winner = 8 seed.'
+      parameters:
+      - description: Play-in team IDs for each conference
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/internal_api.SimulatePlayInRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_api.SimulatePlayInResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_api.ErrorResponse'
+      summary: Simulate the NBA play-in tournament
       tags:
       - simulate
   /simulate/season:

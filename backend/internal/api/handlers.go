@@ -129,6 +129,77 @@ func (h *Handlers) SimulateSeason(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// SimulatePlayIn godoc
+// @Summary      Simulate the NBA play-in tournament
+// @Description  Runs all 6 play-in games (3 per conference). Game 1: 7 hosts 8 — winner = 7 seed. Game 2: 9 hosts 10. Game 3: loser of G1 hosts winner of G2 — winner = 8 seed.
+// @Tags         simulate
+// @Accept       json
+// @Produce      json
+// @Param        body  body      SimulatePlayInRequest  true  "Play-in team IDs for each conference"
+// @Success      200   {object}  SimulatePlayInResponse
+// @Failure      400   {object}  ErrorResponse
+// @Router       /simulate/playin [post]
+func (h *Handlers) SimulatePlayIn(w http.ResponseWriter, r *http.Request) {
+	r.Body = http.MaxBytesReader(w, r.Body, 4096)
+	var req SimulatePlayInRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeError(w, http.StatusBadRequest, "invalid JSON body")
+		return
+	}
+
+	east := req.East
+	west := req.West
+	for label, ids := range map[string][4]string{
+		"east": {east.Seed7, east.Seed8, east.Seed9, east.Seed10},
+		"west": {west.Seed7, west.Seed8, west.Seed9, west.Seed10},
+	} {
+		for i, id := range ids {
+			if id == "" {
+				writeError(w, http.StatusBadRequest, fmt.Sprintf("%s seed%d is empty", label, i+7))
+				return
+			}
+		}
+	}
+
+	seed := time.Now().UnixNano()
+	if req.Seed != nil {
+		seed = *req.Seed
+	}
+
+	result := sim.SimulatePlayIn(h.cfg,
+		sim.PlayInInput{Seed7: east.Seed7, Seed8: east.Seed8, Seed9: east.Seed9, Seed10: east.Seed10},
+		sim.PlayInInput{Seed7: west.Seed7, Seed8: west.Seed8, Seed9: west.Seed9, Seed10: west.Seed10},
+		seed,
+	)
+
+	writeJSON(w, http.StatusOK, SimulatePlayInResponse{
+		Seed: seed,
+		East: mapConferencePlayIn(result.East),
+		West: mapConferencePlayIn(result.West),
+	})
+}
+
+func mapPlayInGame(g sim.PlayInGameResult) PlayInGame {
+	return PlayInGame{
+		Home:      g.Home,
+		Away:      g.Away,
+		HomeScore: g.HomeScore,
+		AwayScore: g.AwayScore,
+		Winner:    g.Winner,
+		Loser:     g.Loser,
+	}
+}
+
+func mapConferencePlayIn(c sim.ConferencePlayInResult) ConferencePlayIn {
+	return ConferencePlayIn{
+		Game1:    mapPlayInGame(c.Game1),
+		Game2:    mapPlayInGame(c.Game2),
+		Game3:    mapPlayInGame(c.Game3),
+		Playoff7: c.Playoff7,
+		Playoff8: c.Playoff8,
+	}
+}
+
 // SimulateDraftLottery godoc
 // @Summary      Simulate the NBA draft lottery
 // @Description  Runs the NBA draft lottery for 14 teams using official ball-combination odds. Picks 1-4 are drawn by weighted lottery; picks 5-14 go to remaining teams in seed order.
