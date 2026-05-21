@@ -26,7 +26,7 @@ func NewHandlers(cfg *config.Bundle) *Handlers {
 // @Tags         seasons
 // @Produce      json
 // @Success      200  {object}  ListSeasonsResponse
-// @Router       /seasons [get]
+// @Router       /nba/seasons [get]
 func (h *Handlers) ListSeasons(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, ListSeasonsResponse{
 		Seasons:       h.cfg.AvailableSeasons,
@@ -40,7 +40,7 @@ func (h *Handlers) ListSeasons(w http.ResponseWriter, r *http.Request) {
 // @Tags         teams
 // @Produce      json
 // @Success      200  {object}  ListTeamsResponse
-// @Router       /teams [get]
+// @Router       /nba/teams [get]
 func (h *Handlers) ListTeams(w http.ResponseWriter, r *http.Request) {
 	teams := h.cfg.SortedTeams()
 	opts := make([]TeamOption, len(teams))
@@ -59,7 +59,7 @@ func (h *Handlers) ListTeams(w http.ResponseWriter, r *http.Request) {
 // @Param        body  body      SimulateRequest  true  "Home/away team ids and optional seed"
 // @Success      200   {object}  SimulateResponse
 // @Failure      400   {object}  ErrorResponse
-// @Router       /simulate [post]
+// @Router       /nba/simulate [post]
 func (h *Handlers) Simulate(w http.ResponseWriter, r *http.Request) {
 	r.Body = http.MaxBytesReader(w, r.Body, 4096)
 	var req SimulateRequest
@@ -110,7 +110,7 @@ func (h *Handlers) Simulate(w http.ResponseWriter, r *http.Request) {
 // @Produce      json
 // @Param        body  body      SimulateSeasonRequest  false  "Optional seed for reproducibility"
 // @Success      200   {object}  SimulateSeasonResponse
-// @Router       /simulate/season [post]
+// @Router       /nba/simulate/season [post]
 func (h *Handlers) SimulateSeason(w http.ResponseWriter, r *http.Request) {
 	r.Body = http.MaxBytesReader(w, r.Body, 4096)
 	var req SimulateSeasonRequest
@@ -148,7 +148,7 @@ func (h *Handlers) SimulateSeason(w http.ResponseWriter, r *http.Request) {
 // @Param        body  body      SimulatePlayInRequest  true  "Play-in team IDs for each conference"
 // @Success      200   {object}  SimulatePlayInResponse
 // @Failure      400   {object}  ErrorResponse
-// @Router       /simulate/playin [post]
+// @Router       /nba/simulate/playin [post]
 func (h *Handlers) SimulatePlayIn(w http.ResponseWriter, r *http.Request) {
 	r.Body = http.MaxBytesReader(w, r.Body, 4096)
 	var req SimulatePlayInRequest
@@ -225,7 +225,7 @@ func mapConferencePlayIn(c sim.ConferencePlayInResult) ConferencePlayIn {
 // @Param        body  body      SimulateDraftLotteryRequest  true  "14 team IDs in lottery-seed order (index 0 = worst record)"
 // @Success      200   {object}  SimulateDraftLotteryResponse
 // @Failure      400   {object}  ErrorResponse
-// @Router       /simulate/draft-lottery [post]
+// @Router       /nba/simulate/draft-lottery [post]
 func (h *Handlers) SimulateDraftLottery(w http.ResponseWriter, r *http.Request) {
 	r.Body = http.MaxBytesReader(w, r.Body, 4096)
 	var req SimulateDraftLotteryRequest

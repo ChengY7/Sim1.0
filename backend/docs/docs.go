@@ -15,7 +15,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/seasons": {
+        "/nba/seasons": {
             "get": {
                 "description": "Returns season identifiers that can be passed as the \"season\" parameter to simulate endpoints.",
                 "produces": [
@@ -35,7 +35,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/simulate": {
+        "/nba/simulate": {
             "post": {
                 "description": "Runs possessions until the game clock ends. Same seed produces the same game.",
                 "consumes": [
@@ -75,7 +75,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/simulate/draft-lottery": {
+        "/nba/simulate/draft-lottery": {
             "post": {
                 "description": "Runs the NBA draft lottery for 14 teams using official ball-combination odds. Picks 1-4 are drawn by weighted lottery; picks 5-14 go to remaining teams in seed order.",
                 "consumes": [
@@ -115,7 +115,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/simulate/playin": {
+        "/nba/simulate/playin": {
             "post": {
                 "description": "Runs all 6 play-in games (3 per conference). Game 1: 7 hosts 8 — winner = 7 seed. Game 2: 9 hosts 10. Game 3: loser of G1 hosts winner of G2 — winner = 8 seed.",
                 "consumes": [
@@ -155,7 +155,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/simulate/season": {
+        "/nba/simulate/season": {
             "post": {
                 "description": "Runs every game in the 2025-26 schedule and returns standings with W, L, streak, last-10, home/away records, PPG, OPPG, and DIFF.",
                 "consumes": [
@@ -188,7 +188,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/teams": {
+        "/nba/teams": {
             "get": {
                 "description": "Returns team ids and names from teams.json",
                 "produces": [

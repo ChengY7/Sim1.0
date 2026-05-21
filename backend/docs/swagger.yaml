@@ -354,7 +354,7 @@ info:
   title: Sim1.0 API
   version: "1.0"
 paths:
-  /seasons:
+  /nba/seasons:
     get:
       description: Returns season identifiers that can be passed as the "season" parameter
         to simulate endpoints.
@@ -368,7 +368,7 @@ paths:
       summary: List available season rating files
       tags:
       - seasons
-  /simulate:
+  /nba/simulate:
     post:
       consumes:
       - application/json
@@ -395,7 +395,7 @@ paths:
       summary: Simulate a full game
       tags:
       - simulate
-  /simulate/draft-lottery:
+  /nba/simulate/draft-lottery:
     post:
       consumes:
       - application/json
@@ -423,7 +423,7 @@ paths:
       summary: Simulate the NBA draft lottery
       tags:
       - simulate
-  /simulate/playin:
+  /nba/simulate/playin:
     post:
       consumes:
       - application/json
@@ -451,7 +451,7 @@ paths:
       summary: Simulate the NBA play-in tournament
       tags:
       - simulate
-  /simulate/season:
+  /nba/simulate/season:
     post:
       consumes:
       - application/json
@@ -473,7 +473,7 @@ paths:
       summary: Simulate a full NBA regular season
       tags:
       - simulate
-  /teams:
+  /nba/teams:
     get:
       description: Returns team ids and names from teams.json
       produces:

@@ -8,12 +8,12 @@ import (
 
 func NewRouter(h *Handlers, corsOrigin string) http.Handler {
 	mux := http.NewServeMux()
-	mux.HandleFunc("GET /seasons", h.ListSeasons)
-	mux.HandleFunc("GET /teams", h.ListTeams)
-	mux.HandleFunc("POST /simulate", h.Simulate)
-	mux.HandleFunc("POST /simulate/season", h.SimulateSeason)
-	mux.HandleFunc("POST /simulate/playin", h.SimulatePlayIn)
-	mux.HandleFunc("POST /simulate/draft-lottery", h.SimulateDraftLottery)
+	mux.HandleFunc("GET /nba/seasons", h.ListSeasons)
+	mux.HandleFunc("GET /nba/teams", h.ListTeams)
+	mux.HandleFunc("POST /nba/simulate", h.Simulate)
+	mux.HandleFunc("POST /nba/simulate/season", h.SimulateSeason)
+	mux.HandleFunc("POST /nba/simulate/playin", h.SimulatePlayIn)
+	mux.HandleFunc("POST /nba/simulate/draft-lottery", h.SimulateDraftLottery)
 	mux.Handle("GET /swagger/", httpSwagger.WrapHandler)
 	return cors(mux, corsOrigin)
 }
