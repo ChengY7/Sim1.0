@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -126,6 +127,45 @@ func (h *Handlers) SimulateSeason(w http.ResponseWriter, r *http.Request) {
 		Standings: out,
 		Cup:       mapCupBracket(result.Cup),
 	})
+}
+
+// SimulateDraftLottery godoc
+// @Summary      Simulate the NBA draft lottery
+// @Description  Runs the NBA draft lottery for 14 teams using official ball-combination odds. Picks 1-4 are drawn by weighted lottery; picks 5-14 go to remaining teams in seed order.
+// @Tags         simulate
+// @Accept       json
+// @Produce      json
+// @Param        body  body      SimulateDraftLotteryRequest  true  "14 team IDs in lottery-seed order (index 0 = worst record)"
+// @Success      200   {object}  SimulateDraftLotteryResponse
+// @Failure      400   {object}  ErrorResponse
+// @Router       /simulate/draft-lottery [post]
+func (h *Handlers) SimulateDraftLottery(w http.ResponseWriter, r *http.Request) {
+	r.Body = http.MaxBytesReader(w, r.Body, 4096)
+	var req SimulateDraftLotteryRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeError(w, http.StatusBadRequest, "invalid JSON body")
+		return
+	}
+	for i, id := range req.Teams {
+		if id == "" {
+			writeError(w, http.StatusBadRequest, fmt.Sprintf("teams[%d] is empty", i))
+			return
+		}
+	}
+
+	seed := time.Now().UnixNano()
+	if req.Seed != nil {
+		seed = *req.Seed
+	}
+
+	result := sim.SimulateDraftLottery(req.Teams, h.cfg.DraftLottery.Combinations, seed)
+
+	picks := make([]DraftPick, len(result.Picks))
+	for i, p := range result.Picks {
+		picks[i] = DraftPick{Pick: p.Pick, TeamID: p.TeamID, Seed: p.Seed}
+	}
+
+	writeJSON(w, http.StatusOK, SimulateDraftLotteryResponse{Seed: seed, Picks: picks})
 }
 
 func toGameState(s *sim.State, quarters int) GameState {

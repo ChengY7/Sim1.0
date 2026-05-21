@@ -49,6 +49,46 @@
                 }
             }
         },
+        "/simulate/draft-lottery": {
+            "post": {
+                "description": "Runs the NBA draft lottery for 14 teams using official ball-combination odds. Picks 1-4 are drawn by weighted lottery; picks 5-14 go to remaining teams in seed order.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "simulate"
+                ],
+                "summary": "Simulate the NBA draft lottery",
+                "parameters": [
+                    {
+                        "description": "14 team IDs in lottery-seed order (index 0 = worst record)",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_api.SimulateDraftLotteryRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_api.SimulateDraftLotteryResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_api.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/simulate/season": {
             "post": {
                 "description": "Runs every game in the 2025-26 schedule and returns standings with W, L, streak, last-10, home/away records, PPG, OPPG, and DIFF.",
@@ -160,6 +200,23 @@
                 },
                 "winner": {
                     "type": "string"
+                }
+            }
+        },
+        "internal_api.DraftPick": {
+            "type": "object",
+            "properties": {
+                "pick": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "seed": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "team_id": {
+                    "type": "string",
+                    "example": "DET"
                 }
             }
         },
@@ -275,6 +332,36 @@
                     "items": {
                         "$ref": "#/definitions/internal_api.TeamOption"
                     }
+                }
+            }
+        },
+        "internal_api.SimulateDraftLotteryRequest": {
+            "type": "object",
+            "properties": {
+                "seed": {
+                    "type": "integer",
+                    "example": 42
+                },
+                "teams": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "internal_api.SimulateDraftLotteryResponse": {
+            "type": "object",
+            "properties": {
+                "picks": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/internal_api.DraftPick"
+                    }
+                },
+                "seed": {
+                    "type": "integer",
+                    "example": 42
                 }
             }
         },

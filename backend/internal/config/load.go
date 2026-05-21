@@ -83,12 +83,19 @@ type Schedule struct {
 	Games  []ScheduleGame `json:"games"`
 }
 
+// DraftLottery holds the ball-combination counts for the NBA draft lottery.
+// Combinations[i] is the number of combinations assigned to seed i+1 (0-indexed).
+type DraftLottery struct {
+	Combinations [14]int `json:"combinations"`
+}
+
 type Bundle struct {
-	Teams     map[string]Team
-	Outcomes  []Outcome
-	Game      Game
-	Schedule  Schedule
-	CupGroups []CupGroup
+	Teams        map[string]Team
+	Outcomes     []Outcome
+	Game         Game
+	Schedule     Schedule
+	CupGroups    []CupGroup
+	DraftLottery DraftLottery
 }
 
 // Load returns a Bundle using the configs embedded at build time.
@@ -191,12 +198,20 @@ func load(fsys fs.FS) (*Bundle, error) {
 		}
 	}
 
+	var draftLottery DraftLottery
+	if dlData, err := fs.ReadFile(fsys, "draft_lottery.json"); err == nil {
+		if err := json.Unmarshal(dlData, &draftLottery); err != nil {
+			return nil, fmt.Errorf("parse draft_lottery: %w", err)
+		}
+	}
+
 	return &Bundle{
-		Teams:     byID,
-		Outcomes:  of.Outcomes,
-		Game:      game,
-		Schedule:  schedule,
-		CupGroups: cupGroups,
+		Teams:        byID,
+		Outcomes:     of.Outcomes,
+		Game:         game,
+		Schedule:     schedule,
+		CupGroups:    cupGroups,
+		DraftLottery: draftLottery,
 	}, nil
 }
 

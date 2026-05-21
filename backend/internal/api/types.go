@@ -107,6 +107,27 @@ type TeamSeasonStat struct {
 	Diff       float64 `json:"diff"         example:"4.4"`
 }
 
+// SimulateDraftLotteryRequest is the body for POST /simulate/draft-lottery.
+// Teams must contain exactly 14 team IDs ordered by lottery seed:
+// index 0 = seed 1 (worst record), index 13 = seed 14.
+type SimulateDraftLotteryRequest struct {
+	Teams [14]string `json:"teams"`
+	Seed  *int64     `json:"seed,omitempty" example:"42"`
+}
+
+// DraftPick maps a draft pick number to the team that received it.
+type DraftPick struct {
+	Pick   int    `json:"pick" example:"1"`
+	TeamID string `json:"team_id" example:"DET"`
+	Seed   int    `json:"seed" example:"1"`
+}
+
+// SimulateDraftLotteryResponse is returned after a draft lottery simulation.
+type SimulateDraftLotteryResponse struct {
+	Seed  int64       `json:"seed" example:"42"`
+	Picks []DraftPick `json:"picks"`
+}
+
 // ErrorResponse is returned on 4xx errors.
 type ErrorResponse struct {
 	Error string `json:"error" example:"unknown team id"`

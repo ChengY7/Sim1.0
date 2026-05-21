@@ -39,6 +39,18 @@ definitions:
       winner:
         type: string
     type: object
+  internal_api.DraftPick:
+    properties:
+      pick:
+        example: 1
+        type: integer
+      seed:
+        example: 1
+        type: integer
+      team_id:
+        example: DET
+        type: string
+    type: object
   internal_api.ErrorResponse:
     properties:
       error:
@@ -121,6 +133,26 @@ definitions:
         items:
           $ref: '#/definitions/internal_api.TeamOption'
         type: array
+    type: object
+  internal_api.SimulateDraftLotteryRequest:
+    properties:
+      seed:
+        example: 42
+        type: integer
+      teams:
+        items:
+          type: string
+        type: array
+    type: object
+  internal_api.SimulateDraftLotteryResponse:
+    properties:
+      picks:
+        items:
+          $ref: '#/definitions/internal_api.DraftPick'
+        type: array
+      seed:
+        example: 42
+        type: integer
     type: object
   internal_api.SimulateRequest:
     properties:
@@ -245,6 +277,34 @@ paths:
           schema:
             $ref: '#/definitions/internal_api.ErrorResponse'
       summary: Simulate a full game
+      tags:
+      - simulate
+  /simulate/draft-lottery:
+    post:
+      consumes:
+      - application/json
+      description: Runs the NBA draft lottery for 14 teams using official ball-combination
+        odds. Picks 1-4 are drawn by weighted lottery; picks 5-14 go to remaining
+        teams in seed order.
+      parameters:
+      - description: 14 team IDs in lottery-seed order (index 0 = worst record)
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/internal_api.SimulateDraftLotteryRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_api.SimulateDraftLotteryResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_api.ErrorResponse'
+      summary: Simulate the NBA draft lottery
       tags:
       - simulate
   /simulate/season:
