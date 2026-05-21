@@ -1,0 +1,240 @@
+/* ── Outer wrap ── */
+.bracketWrap {
+  overflow-x: auto;
+  padding: 8px 0 16px;
+  animation: fadeUp 0.3s ease;
+}
+
+/* ── Bracket row ── */
+.bracket {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  min-width: max-content;
+  padding: 0 4px;
+}
+
+/* ── QF column: label + 2 stacked cards ── */
+.qfCol {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* ── SF column: label + 1 card vertically centred ── */
+.sfCol {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* Push the SF card to the centre of the two QF cards.
+   Two QF cards (≈68px each) + 8px gap = 144px; one SF card ≈ 68px.
+   Padding-top = (144 - 68) / 2 = 38px, minus the label row (≈22px) = 16px. */
+.sfGameWrap {
+  padding-top: 16px;
+}
+
+/* ── Final column ── */
+.finalCol {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* ── Column labels ── */
+.colLabel {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  white-space: nowrap;
+  height: 22px;
+}
+
+.finalColLabel {
+  color: #d97706;
+  justify-content: center;
+}
+
+.conf {
+  color: var(--accent-blue);
+}
+
+/* ── Bracket connectors ── */
+.connector {
+  display: flex;
+  align-items: center;
+  align-self: stretch;
+  flex-shrink: 0;
+  /* push connector body below the label row */
+  padding-top: 22px;
+}
+
+.connectorMirror {
+  flex-direction: row-reverse;
+}
+
+/* fork: vertical bar connecting QF1-midpoint to QF2-midpoint */
+.connFork {
+  display: flex;
+  flex-direction: column;
+  width: 8px;
+  /* stretch to full height of the two QF cards + gap */
+  flex: 1;
+}
+
+.connTop {
+  flex: 1;
+  border-right: 1px solid rgba(255,255,255,0.12);
+  border-bottom: 1px solid rgba(255,255,255,0.12);
+  border-bottom-right-radius: 3px;
+}
+
+.connBot {
+  flex: 1;
+  border-right: 1px solid rgba(255,255,255,0.12);
+  border-top: 1px solid rgba(255,255,255,0.12);
+  border-top-right-radius: 3px;
+}
+
+/* horizontal bar from fork midpoint to the SF card */
+.connH {
+  width: 8px;
+  height: 1px;
+  background: rgba(255,255,255,0.12);
+  align-self: center;
+}
+
+/* ── Arrow col (between SF and Final) ── */
+.arrowCol {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  padding: 22px 6px 0;
+}
+
+.arrow {
+  font-size: 20px;
+  color: rgba(255,255,255,0.18);
+  line-height: 1;
+}
+
+/* ── Game cards ── */
+.card {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--r-md);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  min-width: 164px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.cardFinal {
+  min-width: 180px;
+  border-color: rgba(217, 119, 6, 0.4);
+  box-shadow: 0 0 28px rgba(217,119,6,0.14);
+}
+
+/* ── Team rows inside a card ── */
+.teamRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+}
+
+.rowWon {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.rowLost {
+  opacity: 0.35;
+}
+
+.rowEmpty {
+  color: var(--text-muted);
+}
+
+.divider {
+  height: 1px;
+  background: var(--glass-border);
+}
+
+.logo {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  flex-shrink: 0;
+  filter: drop-shadow(0 1px 4px rgba(0,0,0,0.5));
+}
+
+.logoGhost {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.05);
+  border: 1px dashed rgba(255,255,255,0.1);
+  flex-shrink: 0;
+}
+
+.seedNum {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-muted);
+  min-width: 10px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.abbr {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  flex: 1;
+}
+
+.seedTag {
+  font-size: 11px;
+  flex: 1;
+  opacity: 0.45;
+}
+
+.score {
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  min-width: 28px;
+  text-align: right;
+  color: var(--text-secondary);
+}
+
+.dash {
+  font-size: 13px;
+  opacity: 0.2;
+  min-width: 28px;
+  text-align: right;
+}
+
+/* ── Champion ── */
+.champion {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 800;
+  color: #d97706;
+  letter-spacing: 0.03em;
+  padding: 2px 0;
+}

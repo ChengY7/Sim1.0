@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react'
 import { simulateSeason } from '../api'
 import { espnLogo } from '../utils/espnLogo'
+import CupBracket from './CupBracket'
 import styles from './SeasonStandings.module.css'
 
 const EAST = new Set(['ATL','BKN','BOS','CHA','CHI','CLE','DET','IND','MIA','MIL','NYK','ORL','PHI','TOR','WAS'])
@@ -23,10 +24,11 @@ function zeroRow(team) {
 }
 
 export default function SeasonStandings({ teams }) {
-  const [conf, setConf]         = useState('east')
+  const [conf, setConf]           = useState('east')
   const [standings, setStandings] = useState(null)  // null = not yet simulated
-  const [loading, setLoading]   = useState(false)
-  const [error, setError]       = useState(null)
+  const [cup, setCup]             = useState(null)
+  const [loading, setLoading]     = useState(false)
+  const [error, setError]         = useState(null)
 
   // Zeroed rows sorted A-Z, shown before first simulation
   const defaultRows = useMemo(
@@ -44,6 +46,7 @@ export default function SeasonStandings({ teams }) {
     try {
       const data = await simulateSeason()
       setStandings(data.standings)
+      setCup(data.cup)
     } catch (err) {
       setError(err.message)
     } finally {
@@ -71,6 +74,12 @@ export default function SeasonStandings({ teams }) {
           >
             West
           </button>
+          <button
+            className={`${styles.confTab} ${conf === 'cup' ? styles.confTabActive : ''}`}
+            onClick={() => setConf('cup')}
+          >
+            NBA Cup
+          </button>
         </div>
 
         <button
@@ -83,31 +92,36 @@ export default function SeasonStandings({ teams }) {
         </button>
       </div>
 
+      {/* NBA Cup bracket */}
+      {conf === 'cup' && <CupBracket cup={cup} />}
+
       {/* Standings table */}
-      <div className={styles.tableWrap}>
-        <table className={styles.table}>
-          <thead>
-            <tr>
-              <th className={styles.thRank}>#</th>
-              <th className={styles.thTeam}>Team</th>
-              <th className={styles.thNum}>W</th>
-              <th className={styles.thNum}>L</th>
-              <th className={styles.thNum}>Streak</th>
-              <th className={styles.thNum}>L10</th>
-              <th className={styles.thNum}>Home</th>
-              <th className={styles.thNum}>Away</th>
-              <th className={styles.thNum}>PPG</th>
-              <th className={styles.thNum}>OPPG</th>
-              <th className={styles.thNum}>DIFF</th>
-            </tr>
-          </thead>
-          <tbody>
-            {confRows.map((row, i) => (
-              <StandingsRow key={row.team_id} row={row} rank={i + 1} simulated={standings !== null} />
-            ))}
-          </tbody>
-        </table>
-      </div>
+      {conf !== 'cup' && (
+        <div className={styles.tableWrap}>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th className={styles.thRank}>#</th>
+                <th className={styles.thTeam}>Team</th>
+                <th className={styles.thNum}>W</th>
+                <th className={styles.thNum}>L</th>
+                <th className={styles.thNum}>Streak</th>
+                <th className={styles.thNum}>L10</th>
+                <th className={styles.thNum}>Home</th>
+                <th className={styles.thNum}>Away</th>
+                <th className={styles.thNum}>PPG</th>
+                <th className={styles.thNum}>OPPG</th>
+                <th className={styles.thNum}>DIFF</th>
+              </tr>
+            </thead>
+            <tbody>
+              {confRows.map((row, i) => (
+                <StandingsRow key={row.team_id} row={row} rank={i + 1} simulated={standings !== null} />
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   )
 }
