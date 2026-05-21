@@ -29,10 +29,18 @@ type TeamRatings struct {
 	Defense float64 `json:"defense"`
 }
 
+// TeamRecord holds the actual end-of-season W/L for one team.
+type TeamRecord struct {
+	ID string `json:"id"`
+	W  int    `json:"w"`
+	L  int    `json:"l"`
+}
+
 // seasonFile is the on-disk format for a season ratings file.
 type seasonFile struct {
-	Season string        `json:"season"`
-	Teams  []TeamRatings `json:"teams"`
+	Season    string        `json:"season"`
+	Teams     []TeamRatings `json:"teams"`
+	Standings []TeamRecord  `json:"standings,omitempty"`
 }
 
 // Outcome represents one possible possession result.
@@ -114,6 +122,7 @@ type Bundle struct {
 	CupGroups        []CupGroup
 	DraftLottery     DraftLottery
 	Seasons          map[string]map[string]TeamRatings // season → teamID → ratings
+	SeasonStandings  map[string][]TeamRecord           // season → actual end-of-season W/L
 	AvailableSeasons []string                          // sorted descending (newest first)
 	DefaultSeason    string
 }
@@ -199,6 +208,7 @@ func load(fsys fs.FS) (*Bundle, error) {
 
 	// Load season rating files from seasons/.
 	seasons := map[string]map[string]TeamRatings{}
+	seasonStandings := map[string][]TeamRecord{}
 	var availableSeasons []string
 	if entries, err := fs.ReadDir(fsys, "seasons"); err == nil {
 		for _, e := range entries {
@@ -225,6 +235,9 @@ func load(fsys fs.FS) (*Bundle, error) {
 				byTeam[r.ID] = r
 			}
 			seasons[sf.Season] = byTeam
+			if len(sf.Standings) > 0 {
+				seasonStandings[sf.Season] = sf.Standings
+			}
 			availableSeasons = append(availableSeasons, sf.Season)
 		}
 	}
@@ -289,6 +302,7 @@ func load(fsys fs.FS) (*Bundle, error) {
 		CupGroups:        cupGroups,
 		DraftLottery:     draftLottery,
 		Seasons:          seasons,
+		SeasonStandings:  seasonStandings,
 		AvailableSeasons: availableSeasons,
 		DefaultSeason:    defaultSeason,
 	}, nil

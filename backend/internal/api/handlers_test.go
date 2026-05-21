@@ -31,17 +31,17 @@ func simulate(t *testing.T, req api.SimulateRequest) *httptest.ResponseRecorder 
 		t.Fatalf("marshal request: %v", err)
 	}
 	rec := httptest.NewRecorder()
-	r := httptest.NewRequest(http.MethodPost, "/simulate", bytes.NewReader(body))
+	r := httptest.NewRequest(http.MethodPost, "/nba/simulate", bytes.NewReader(body))
 	r.Header.Set("Content-Type", "application/json")
 	testRouter.ServeHTTP(rec, r)
 	return rec
 }
 
-// --- GET /teams ---
+// --- GET /nba/teams ---
 
 func TestListTeams_OK(t *testing.T) {
 	rec := httptest.NewRecorder()
-	testRouter.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/teams", nil))
+	testRouter.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/nba/teams", nil))
 
 	if rec.Code != http.StatusOK {
 		t.Fatalf("status = %d, want 200", rec.Code)
@@ -60,7 +60,7 @@ func TestListTeams_OK(t *testing.T) {
 	}
 }
 
-// --- POST /simulate ---
+// --- POST /nba/simulate ---
 
 func TestSimulate_Valid(t *testing.T) {
 	seed := int64(42)
@@ -117,7 +117,7 @@ func TestSimulate_UnknownTeam(t *testing.T) {
 
 func TestSimulate_InvalidJSON(t *testing.T) {
 	rec := httptest.NewRecorder()
-	r := httptest.NewRequest(http.MethodPost, "/simulate", bytes.NewBufferString("{bad json}"))
+	r := httptest.NewRequest(http.MethodPost, "/nba/simulate", bytes.NewBufferString("{bad json}"))
 	r.Header.Set("Content-Type", "application/json")
 	testRouter.ServeHTTP(rec, r)
 	if rec.Code != http.StatusBadRequest {
@@ -128,7 +128,7 @@ func TestSimulate_InvalidJSON(t *testing.T) {
 func TestSimulate_OversizedBody(t *testing.T) {
 	body := bytes.Repeat([]byte("x"), 5000)
 	rec := httptest.NewRecorder()
-	r := httptest.NewRequest(http.MethodPost, "/simulate", bytes.NewReader(body))
+	r := httptest.NewRequest(http.MethodPost, "/nba/simulate", bytes.NewReader(body))
 	r.Header.Set("Content-Type", "application/json")
 	testRouter.ServeHTTP(rec, r)
 	if rec.Code != http.StatusBadRequest {
@@ -138,7 +138,7 @@ func TestSimulate_OversizedBody(t *testing.T) {
 
 func TestCORSHeaders(t *testing.T) {
 	rec := httptest.NewRecorder()
-	testRouter.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/teams", nil))
+	testRouter.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/nba/teams", nil))
 	if got := rec.Header().Get("Access-Control-Allow-Origin"); got == "" {
 		t.Error("expected Access-Control-Allow-Origin header")
 	}
@@ -146,7 +146,7 @@ func TestCORSHeaders(t *testing.T) {
 
 func TestCORSPreflight(t *testing.T) {
 	rec := httptest.NewRecorder()
-	testRouter.ServeHTTP(rec, httptest.NewRequest(http.MethodOptions, "/simulate", nil))
+	testRouter.ServeHTTP(rec, httptest.NewRequest(http.MethodOptions, "/nba/simulate", nil))
 	if rec.Code != http.StatusNoContent {
 		t.Errorf("OPTIONS status = %d, want 204", rec.Code)
 	}

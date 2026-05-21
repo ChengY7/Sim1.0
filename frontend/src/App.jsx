@@ -24,7 +24,7 @@ export default function App() {
 
     fetchSeasons()
       .then(({ seasons, default_season }) => {
-        setSeasons(seasons)
+        setSeasons(seasons) // seasons is now [{season, standings?}, ...]
         setSeason(default_season)
       })
       .catch(() => {}) // non-fatal — season selector just stays empty
@@ -116,11 +116,11 @@ export default function App() {
               {seasons.length > 0
                 ? seasons.map(s => (
                     <button
-                      key={s}
-                      className={`${styles.seasonTab} ${season === s ? styles.seasonTabActive : ''}`}
-                      onClick={() => handleSeasonChange(s)}
+                      key={s.season}
+                      className={`${styles.seasonTab} ${season === s.season ? styles.seasonTabActive : ''}`}
+                      onClick={() => handleSeasonChange(s.season)}
                     >
-                      {s}
+                      {s.season}
                     </button>
                   ))
                 : season
@@ -129,7 +129,12 @@ export default function App() {
               }
             </div>
           </div>
-          <SeasonStandings key={season ?? 'default'} teams={teams} season={season} />
+          <SeasonStandings
+            key={season ?? 'default'}
+            teams={teams}
+            season={season}
+            actualStandings={seasons.find(s => s.season === season)?.standings ?? []}
+          />
         </div>
       )}
     </div>

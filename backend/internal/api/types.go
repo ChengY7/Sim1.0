@@ -1,9 +1,22 @@
 package api
 
+// TeamRecord holds the actual end-of-season W/L for one team.
+type TeamRecord struct {
+	ID string `json:"id"`
+	W  int    `json:"w"`
+	L  int    `json:"l"`
+}
+
+// SeasonInfo describes one available season and its historical standings (if known).
+type SeasonInfo struct {
+	Season    string       `json:"season"`
+	Standings []TeamRecord `json:"standings,omitempty"`
+}
+
 // ListSeasonsResponse lists available season rating files.
 type ListSeasonsResponse struct {
-	Seasons       []string `json:"seasons"`
-	DefaultSeason string   `json:"default_season"`
+	Seasons       []SeasonInfo `json:"seasons"`
+	DefaultSeason string       `json:"default_season"`
 }
 
 // SimulateRequest is the body for POST /simulate.

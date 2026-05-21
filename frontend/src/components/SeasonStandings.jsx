@@ -26,7 +26,7 @@ function zeroRow(team) {
   }
 }
 
-export default function SeasonStandings({ teams, season }) {
+export default function SeasonStandings({ teams, season, actualStandings = [] }) {
   const [conf, setConf]                   = useState('east')
   const [eastStandings, setEastStandings] = useState(null)
   const [westStandings, setWestStandings] = useState(null)
@@ -36,17 +36,38 @@ export default function SeasonStandings({ teams, season }) {
   const [playinLoading, setPlayinLoading] = useState(false)
   const [error, setError]                 = useState(null)
 
-  // Default rows derived from /teams (conference/division from API)
-  const defaultEast = useMemo(
-    () => teams.filter(t => t.conference === 'east').map(zeroRow).sort((a, b) => a.team_id.localeCompare(b.team_id)),
-    [teams]
+  // Build lookups from actualStandings: W/L by team ID, and rank position by team ID.
+  const actualByTeam = useMemo(
+    () => Object.fromEntries(actualStandings.map(s => [s.id, s])),
+    [actualStandings]
   )
-  const defaultWest = useMemo(
-    () => teams.filter(t => t.conference === 'west').map(zeroRow).sort((a, b) => a.team_id.localeCompare(b.team_id)),
-    [teams]
+  const actualRank = useMemo(
+    () => Object.fromEntries(actualStandings.map((s, i) => [s.id, i])),
+    [actualStandings]
   )
+  const hasActual = actualStandings.length > 0
 
-  const simulated = eastStandings !== null
+  // Default rows: use actual W/L and preserve exact JSON seed order when available.
+  const defaultEast = useMemo(() => {
+    const rows = teams
+      .filter(t => t.conference === 'east')
+      .map(t => ({ ...zeroRow(t), w: actualByTeam[t.id]?.w ?? 0, l: actualByTeam[t.id]?.l ?? 0 }))
+    return hasActual
+      ? rows.sort((a, b) => (actualRank[a.team_id] ?? 999) - (actualRank[b.team_id] ?? 999))
+      : rows.sort((a, b) => a.team_id.localeCompare(b.team_id))
+  }, [teams, actualByTeam, actualRank, hasActual])
+
+  const defaultWest = useMemo(() => {
+    const rows = teams
+      .filter(t => t.conference === 'west')
+      .map(t => ({ ...zeroRow(t), w: actualByTeam[t.id]?.w ?? 0, l: actualByTeam[t.id]?.l ?? 0 }))
+    return hasActual
+      ? rows.sort((a, b) => (actualRank[a.team_id] ?? 999) - (actualRank[b.team_id] ?? 999))
+      : rows.sort((a, b) => a.team_id.localeCompare(b.team_id))
+  }, [teams, actualByTeam, actualRank, hasActual])
+
+  const simulated  = eastStandings !== null
+  const showActual = !simulated && hasActual
   const eastRows  = eastStandings ?? defaultEast
   const westRows  = westStandings ?? defaultWest
   const confRows  = conf === 'east' ? eastRows : westRows
@@ -128,14 +149,17 @@ export default function SeasonStandings({ teams, season }) {
           </button>
         </div>
 
-        <button
-          className={styles.btnSim}
-          onClick={handleSimulate}
-          disabled={loading || teams.length === 0}
-        >
-          {loading ? <span className={styles.spinner} /> : <CalendarIcon />}
-          <span>{loading ? 'Simulating…' : 'Simulate Season'}</span>
-        </button>
+        <div className={styles.simGroup}>
+          {showActual && <span className={styles.actualBadge}>Actual</span>}
+          <button
+            className={styles.btnSim}
+            onClick={handleSimulate}
+            disabled={loading || teams.length === 0}
+          >
+            {loading ? <span className={styles.spinner} /> : <CalendarIcon />}
+            <span>{loading ? 'Simulating…' : 'Simulate Season'}</span>
+          </button>
+        </div>
       </div>
 
       {/* NBA Cup bracket */}
@@ -185,7 +209,7 @@ export default function SeasonStandings({ teams, season }) {
             </thead>
             <tbody>
               {confRows.map((row, i) => (
-                <StandingsRow key={row.team_id} row={row} rank={i + 1} simulated={simulated} />
+                <StandingsRow key={row.team_id} row={row} rank={i + 1} simulated={simulated} showActual={showActual} />
               ))}
             </tbody>
           </table>
@@ -195,11 +219,12 @@ export default function SeasonStandings({ teams, season }) {
   )
 }
 
-function StandingsRow({ row, rank, simulated }) {
+function StandingsRow({ row, rank, simulated, showActual }) {
   const streakWin  = simulated && row.streak.startsWith('W')
   const streakLoss = simulated && row.streak.startsWith('L')
   const diffPos    = simulated && row.diff > 0
   const diffNeg    = simulated && row.diff < 0
+  const showWL     = simulated || showActual
 
   return (
     <tr className={styles.row}>
@@ -218,8 +243,8 @@ function StandingsRow({ row, rank, simulated }) {
         </div>
       </td>
 
-      <td className={styles.tdNum}>{row.w}</td>
-      <td className={styles.tdNum}>{row.l}</td>
+      <td className={styles.tdNum}>{showWL ? row.w : '—'}</td>
+      <td className={styles.tdNum}>{showWL ? row.l : '—'}</td>
 
       <td className={styles.tdNum}>{simulated ? row.conf_record : '—'}</td>
       <td className={styles.tdNum}>{simulated ? row.div_record : '—'}</td>

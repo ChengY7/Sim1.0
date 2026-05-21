@@ -28,8 +28,19 @@ func NewHandlers(cfg *config.Bundle) *Handlers {
 // @Success      200  {object}  ListSeasonsResponse
 // @Router       /nba/seasons [get]
 func (h *Handlers) ListSeasons(w http.ResponseWriter, r *http.Request) {
+	seasons := make([]SeasonInfo, len(h.cfg.AvailableSeasons))
+	for i, s := range h.cfg.AvailableSeasons {
+		info := SeasonInfo{Season: s}
+		if records, ok := h.cfg.SeasonStandings[s]; ok {
+			info.Standings = make([]TeamRecord, len(records))
+			for j, rec := range records {
+				info.Standings[j] = TeamRecord{ID: rec.ID, W: rec.W, L: rec.L}
+			}
+		}
+		seasons[i] = info
+	}
 	writeJSON(w, http.StatusOK, ListSeasonsResponse{
-		Seasons:       h.cfg.AvailableSeasons,
+		Seasons:       seasons,
 		DefaultSeason: h.cfg.DefaultSeason,
 	})
 }
