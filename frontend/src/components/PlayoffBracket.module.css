@@ -1,0 +1,208 @@
+.wrap {
+  animation: fadeUp 0.3s ease;
+}
+
+/* ── Header ── */
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.note {
+  font-size: 12px;
+  color: var(--text-muted);
+  flex: 1;
+}
+
+.champion {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 14px;
+  color: #d97706;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.champLogo {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+}
+
+.btnSim {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+  border: none; border-radius: 50px;
+  color: #fff; cursor: pointer;
+  font-family: inherit; font-size: 13px; font-weight: 600; letter-spacing: 0.03em;
+  padding: 9px 22px;
+  box-shadow: 0 4px 20px rgba(99,102,241,0.35);
+  transition: transform 0.15s, box-shadow 0.15s;
+  white-space: nowrap; flex-shrink: 0;
+}
+.btnSim:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 28px rgba(99,102,241,0.52); }
+.btnSim:active:not(:disabled) { transform: translateY(0); }
+.btnSim:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.spinner {
+  width: 15px; height: 15px;
+  border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+/* ── Bracket outer ── */
+.bracketOuter {
+  overflow-x: auto;
+  padding-bottom: 16px;
+}
+
+.bracketRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+  min-width: max-content;
+}
+
+/* ── Column ── */
+.bcol {
+  display: flex;
+  flex-direction: column;
+  min-width: 130px;
+}
+
+.colLabel {
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.colLabelGold {
+  color: #d97706;
+}
+
+/* ── Arrow between CF and Finals ── */
+.arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 2px;
+  font-size: 18px;
+  color: rgba(255,255,255,0.15);
+  flex-shrink: 0;
+  width: 20px;
+}
+
+/* ── Series card ── */
+.card {
+  width: 130px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--r-md);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.cardFinals {
+  width: 140px;
+  border-color: rgba(217,119,6,0.35);
+  box-shadow: 0 0 28px rgba(217,119,6,0.12);
+}
+
+/* ── Team row ── */
+.teamRow {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 8px;
+}
+
+.rowWon {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.rowLost {
+  opacity: 0.3;
+}
+
+.rowEmpty {
+  color: var(--text-muted);
+}
+
+.divider {
+  height: 1px;
+  background: var(--glass-border);
+}
+
+.logo {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  flex-shrink: 0;
+  filter: drop-shadow(0 1px 4px rgba(0,0,0,0.5));
+}
+
+.logoGhost {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.05);
+  border: 1px dashed rgba(255,255,255,0.1);
+  flex-shrink: 0;
+}
+
+.seedNum {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-muted);
+  min-width: 12px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.abbr {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.wins {
+  font-size: 13px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  min-width: 16px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.dash {
+  opacity: 0.2;
+  font-weight: 400;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

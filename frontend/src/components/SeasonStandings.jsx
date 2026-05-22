@@ -1,9 +1,10 @@
 import { useState, useMemo } from 'react'
-import { simulateSeason, simulatePlayIn } from '../api'
+import { simulateSeason, simulatePlayIn, simulatePlayoffs } from '../api'
 import { espnLogo } from '../utils/espnLogo'
 import CupBracket from './CupBracket'
 import PlayInBracket from './PlayInBracket'
 import DraftLottery from './DraftLottery'
+import PlayoffBracket from './PlayoffBracket'
 import styles from './SeasonStandings.module.css'
 
 function zeroRow(team) {
@@ -32,8 +33,10 @@ export default function SeasonStandings({ teams, season, actualStandings = [] })
   const [westStandings, setWestStandings] = useState(null)
   const [cup, setCup]                     = useState(null)
   const [playin, setPlayin]               = useState(null)
+  const [playoff, setPlayoff]             = useState(null)
   const [loading, setLoading]             = useState(false)
   const [playinLoading, setPlayinLoading] = useState(false)
+  const [playoffLoading, setPlayoffLoading] = useState(false)
   const [error, setError]                 = useState(null)
 
   // Build lookups from actualStandings: W/L by team ID, and rank position by team ID.
@@ -76,10 +79,42 @@ export default function SeasonStandings({ teams, season, actualStandings = [] })
   const eastSeeds = { s7: eastRows[6]?.team_id, s8: eastRows[7]?.team_id, s9: eastRows[8]?.team_id, s10: eastRows[9]?.team_id }
   const westSeeds = { s7: westRows[6]?.team_id, s8: westRows[7]?.team_id, s9: westRows[8]?.team_id, s10: westRows[9]?.team_id }
 
+  // Playoff seeds: 1-6 from standings, 7-8 from play-in
+  const eastPlayoffSeeds = useMemo(() => {
+    if (!eastStandings) return []
+    const byId = Object.fromEntries(eastStandings.map(t => [t.team_id, t]))
+    const seeds = eastStandings.slice(0, 6).map((t, i) => ({
+      seed: i + 1, teamId: t.team_id, seasonW: t.w, seasonL: t.l,
+    }))
+    if (playin) {
+      ;[playin.east.playoff_7, playin.east.playoff_8].forEach((id, i) => {
+        const t = byId[id] ?? {}
+        seeds.push({ seed: i + 7, teamId: id, seasonW: t.w ?? 0, seasonL: t.l ?? 0 })
+      })
+    }
+    return seeds
+  }, [eastStandings, playin])
+
+  const westPlayoffSeeds = useMemo(() => {
+    if (!westStandings) return []
+    const byId = Object.fromEntries(westStandings.map(t => [t.team_id, t]))
+    const seeds = westStandings.slice(0, 6).map((t, i) => ({
+      seed: i + 1, teamId: t.team_id, seasonW: t.w, seasonL: t.l,
+    }))
+    if (playin) {
+      ;[playin.west.playoff_7, playin.west.playoff_8].forEach((id, i) => {
+        const t = byId[id] ?? {}
+        seeds.push({ seed: i + 7, teamId: id, seasonW: t.w ?? 0, seasonL: t.l ?? 0 })
+      })
+    }
+    return seeds
+  }, [westStandings, playin])
+
   async function handleSimulate() {
     setError(null)
     setLoading(true)
     setPlayin(null)
+    setPlayoff(null)
     try {
       const data = await simulateSeason(season)
       setEastStandings(data.east)
@@ -95,6 +130,7 @@ export default function SeasonStandings({ teams, season, actualStandings = [] })
   async function handleSimulatePlayIn() {
     setError(null)
     setPlayinLoading(true)
+    setPlayoff(null)
     try {
       const data = await simulatePlayIn(
         { seed7: eastSeeds.s7, seed8: eastSeeds.s8, seed9: eastSeeds.s9, seed10: eastSeeds.s10 },
@@ -106,6 +142,24 @@ export default function SeasonStandings({ teams, season, actualStandings = [] })
       setError(err.message)
     } finally {
       setPlayinLoading(false)
+    }
+  }
+
+  async function handleSimulatePlayoffs() {
+    setError(null)
+    setPlayoffLoading(true)
+    try {
+      const toApi = s => ({ seed: s.seed, team_id: s.teamId, season_w: s.seasonW, season_l: s.seasonL })
+      const data = await simulatePlayoffs(
+        eastPlayoffSeeds.map(toApi),
+        westPlayoffSeeds.map(toApi),
+        season,
+      )
+      setPlayoff(data)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setPlayoffLoading(false)
     }
   }
 
@@ -147,6 +201,12 @@ export default function SeasonStandings({ teams, season, actualStandings = [] })
           >
             Draft Lottery
           </button>
+          <button
+            className={`${styles.confTab} ${conf === 'playoffs' ? styles.confTabActive : ''}`}
+            onClick={() => setConf('playoffs')}
+          >
+            Playoffs
+          </button>
         </div>
 
         <div className={styles.simGroup}>
@@ -186,8 +246,21 @@ export default function SeasonStandings({ teams, season, actualStandings = [] })
         />
       )}
 
+      {/* Playoffs */}
+      {conf === 'playoffs' && (
+        <PlayoffBracket
+          eastSeeds={eastPlayoffSeeds}
+          westSeeds={westPlayoffSeeds}
+          playoffResult={playoff}
+          onSimulate={handleSimulatePlayoffs}
+          loading={playoffLoading}
+          seasonSimulated={simulated}
+          playinSimulated={playin !== null}
+        />
+      )}
+
       {/* Standings table */}
-      {conf !== 'cup' && conf !== 'playin' && conf !== 'lottery' && (
+      {conf !== 'cup' && conf !== 'playin' && conf !== 'lottery' && conf !== 'playoffs' && (
         <div className={styles.tableWrap}>
           <table className={styles.table}>
             <thead>
