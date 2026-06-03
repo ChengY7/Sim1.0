@@ -1,5 +1,5 @@
 import styles from './CupBracket.module.css'
-import { espnLogo } from '../utils/espnLogo'
+import { espnLogo } from '../../utils/espnLogo'
 
 // Layout constants
 const SLOT    = 88     // px per QF slot → BH = 4 * SLOT = 352px

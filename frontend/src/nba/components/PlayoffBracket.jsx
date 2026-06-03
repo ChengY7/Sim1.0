@@ -1,5 +1,5 @@
 import styles from './PlayoffBracket.module.css'
-import { espnLogo } from '../utils/espnLogo'
+import { espnLogo } from '../../utils/espnLogo'
 
 const SLOT = 130           // px height per R1 matchup slot
 const BH   = SLOT * 4     // total bracket body height = 520px

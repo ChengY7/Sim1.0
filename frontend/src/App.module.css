@@ -38,6 +38,34 @@
   background-clip: text;
 }
 
+/* ── Sport tabs ── */
+.sportTabs {
+  display: flex;
+  gap: 4px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 50px;
+  padding: 4px;
+}
+
+.sportTab {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 16px;
+  background: transparent;
+  border: none;
+  border-radius: 50px;
+  color: var(--text-muted);
+  font-family: inherit; font-size: 13px; font-weight: 600;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.sportTab:hover { color: var(--text-primary); }
+.sportTabActive {
+  background: rgba(59,130,246,0.15);
+  color: var(--accent-blue);
+}
+
 /* ── Mode tabs ── */
 .modeTabs {
   display: flex;
@@ -120,6 +148,29 @@
   font-size: 12px;
   color: var(--text-muted);
   padding: 6px 10px;
+}
+
+/* ── Coming soon placeholder ── */
+.comingSoon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 80px 20px;
+  color: var(--text-muted);
+  text-align: center;
+  animation: fadeUp 0.3s ease;
+}
+.comingSoon h2 {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+.comingSoon p {
+  font-size: 14px;
+  margin: 0;
 }
 
 .simWrap { text-align: center; margin-bottom: 40px; }

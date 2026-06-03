@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/chengyang/sim1.0/backend/internal/config"
-	"github.com/chengyang/sim1.0/backend/internal/sim"
+	"github.com/chengyang/sim1.0/backend/internal/nba/config"
+	"github.com/chengyang/sim1.0/backend/internal/nba/sim"
 )
 
 

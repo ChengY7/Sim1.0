@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import styles from './TeamPicker.module.css'
-import { espnLogo } from '../utils/espnLogo'
+import { espnLogo } from '../../utils/espnLogo'
 
 export default function TeamPicker({ teams, homeId, onHomeChange, awayId, onAwayChange }) {
   return (

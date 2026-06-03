@@ -1,5 +1,5 @@
 import styles from './PlayInBracket.module.css'
-import { espnLogo } from '../utils/espnLogo'
+import { espnLogo } from '../../utils/espnLogo'
 
 export default function PlayInBracket({ eastSeeds, westSeeds, playin, seasonSimulated }) {
   const simulated = playin !== null

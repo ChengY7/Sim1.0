@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { simulateSeason, simulatePlayIn, simulatePlayoffs } from '../api'
-import { espnLogo } from '../utils/espnLogo'
+import { espnLogo } from '../../utils/espnLogo'
 import CupBracket from './CupBracket'
 import PlayInBracket from './PlayInBracket'
 import DraftLottery from './DraftLottery'

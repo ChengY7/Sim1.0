@@ -6,7 +6,7 @@ import (
 	"math/rand"
 	"sort"
 
-	"github.com/chengyang/sim1.0/backend/internal/config"
+	"github.com/chengyang/sim1.0/backend/internal/nba/config"
 )
 
 // TeamSeasonStat is the end-of-season summary for one team.

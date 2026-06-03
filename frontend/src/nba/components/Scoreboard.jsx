@@ -1,5 +1,5 @@
 import styles from './Scoreboard.module.css'
-import { espnLogo } from '../utils/espnLogo'
+import { espnLogo } from '../../utils/espnLogo'
 
 export default function Scoreboard({ state, seed, homeId, awayId }) {
   const diff      = Math.abs(state.home_score - state.away_score)

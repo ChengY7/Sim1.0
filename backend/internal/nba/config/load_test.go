@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/chengyang/sim1.0/backend/internal/config"
+	"github.com/chengyang/sim1.0/backend/internal/nba/config"
 )
 
 func writeFile(t *testing.T, path, content string) {

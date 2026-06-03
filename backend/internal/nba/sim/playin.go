@@ -3,7 +3,7 @@ package sim
 import (
 	"math/rand"
 
-	"github.com/chengyang/sim1.0/backend/internal/config"
+	"github.com/chengyang/sim1.0/backend/internal/nba/config"
 )
 
 type PlayInInput struct {

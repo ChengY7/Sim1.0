@@ -10,7 +10,7 @@ import (
 	"testing"
 
 	"github.com/chengyang/sim1.0/backend/internal/api"
-	"github.com/chengyang/sim1.0/backend/internal/config"
+	"github.com/chengyang/sim1.0/backend/internal/nba/config"
 )
 
 var testRouter http.Handler

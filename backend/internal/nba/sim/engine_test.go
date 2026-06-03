@@ -3,8 +3,8 @@ package sim_test
 import (
 	"testing"
 
-	"github.com/chengyang/sim1.0/backend/internal/config"
-	"github.com/chengyang/sim1.0/backend/internal/sim"
+	"github.com/chengyang/sim1.0/backend/internal/nba/config"
+	"github.com/chengyang/sim1.0/backend/internal/nba/sim"
 )
 
 func loadBundle(t *testing.T) *config.Bundle {

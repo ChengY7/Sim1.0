@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { simulateDraftLottery } from '../api'
-import { espnLogo } from '../utils/espnLogo'
+import { espnLogo } from '../../utils/espnLogo'
 import styles from './DraftLottery.module.css'
 
 // ── Static probability table ───────────────────────────────────────────────
