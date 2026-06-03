@@ -10,17 +10,22 @@ import (
 	"testing"
 
 	"github.com/chengyang/sim1.0/backend/internal/api"
-	"github.com/chengyang/sim1.0/backend/internal/nba/config"
+	fifaconfig "github.com/chengyang/sim1.0/backend/internal/fifa/config"
+	nbaconfig "github.com/chengyang/sim1.0/backend/internal/nba/config"
 )
 
 var testRouter http.Handler
 
 func TestMain(m *testing.M) {
-	cfg, err := config.Load()
+	cfg, err := nbaconfig.Load()
 	if err != nil {
-		log.Fatalf("config.Load: %v", err)
+		log.Fatalf("nbaconfig.Load: %v", err)
 	}
-	testRouter = api.NewRouter(api.NewHandlers(cfg), "http://localhost:3000")
+	fifaCfg, err := fifaconfig.Load()
+	if err != nil {
+		log.Fatalf("fifaconfig.Load: %v", err)
+	}
+	testRouter = api.NewRouter(api.NewHandlers(cfg, fifaCfg), "http://localhost:3000")
 	os.Exit(m.Run())
 }
 

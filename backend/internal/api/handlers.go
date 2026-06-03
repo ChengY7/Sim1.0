@@ -7,17 +7,19 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/chengyang/sim1.0/backend/internal/nba/config"
+	nbaconfig "github.com/chengyang/sim1.0/backend/internal/nba/config"
 	"github.com/chengyang/sim1.0/backend/internal/nba/sim"
+
+	fifaconfig "github.com/chengyang/sim1.0/backend/internal/fifa/config"
 )
 
-
 type Handlers struct {
-	cfg *config.Bundle
+	cfg     *nbaconfig.Bundle
+	fifaCfg *fifaconfig.Bundle
 }
 
-func NewHandlers(cfg *config.Bundle) *Handlers {
-	return &Handlers{cfg: cfg}
+func NewHandlers(cfg *nbaconfig.Bundle, fifaCfg *fifaconfig.Bundle) *Handlers {
+	return &Handlers{cfg: cfg, fifaCfg: fifaCfg}
 }
 
 // ListSeasons godoc
@@ -422,7 +424,7 @@ func mapConferencePlayoffResult(c sim.ConferencePlayoffResult) ConferencePlayoff
 
 // cfgForSeason returns the bundle with ratings for the requested season,
 // falling back to the default season if season is nil or empty.
-func (h *Handlers) cfgForSeason(season *string) (*config.Bundle, error) {
+func (h *Handlers) cfgForSeason(season *string) (*nbaconfig.Bundle, error) {
 	s := h.cfg.DefaultSeason
 	if season != nil && *season != "" {
 		s = *season

@@ -15,6 +15,8 @@ func NewRouter(h *Handlers, corsOrigin string) http.Handler {
 	mux.HandleFunc("POST /nba/simulate/playin", h.SimulatePlayIn)
 	mux.HandleFunc("POST /nba/simulate/draft-lottery", h.SimulateDraftLottery)
 	mux.HandleFunc("POST /nba/simulate/playoffs", h.SimulatePlayoffs)
+	mux.HandleFunc("GET /fifa/teams", h.FIFAListTeams)
+	mux.HandleFunc("POST /fifa/simulate", h.FIFASimulate)
 	mux.Handle("GET /swagger/", httpSwagger.WrapHandler)
 	return cors(mux, corsOrigin)
 }

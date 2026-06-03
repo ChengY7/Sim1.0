@@ -86,6 +86,94 @@ definitions:
         example: unknown team id
         type: string
     type: object
+  internal_api.FIFAListTeamsResponse:
+    properties:
+      teams:
+        items:
+          $ref: '#/definitions/internal_api.FIFATeamOption'
+        type: array
+    type: object
+  internal_api.FIFAPenaltyKick:
+    properties:
+      kick_no:
+        type: integer
+      scored:
+        type: boolean
+      team:
+        type: string
+    type: object
+  internal_api.FIFAPenaltyResult:
+    properties:
+      kicks:
+        items:
+          $ref: '#/definitions/internal_api.FIFAPenaltyKick'
+        type: array
+      team1_scored:
+        type: integer
+      team2_scored:
+        type: integer
+    type: object
+  internal_api.FIFASimulateRequest:
+    properties:
+      extra_time:
+        example: false
+        type: boolean
+      host_team_id:
+        description: 'optional: team receiving +100 Elo crowd boost'
+        example: USA
+        type: string
+      seed:
+        example: 42
+        type: integer
+      team1_id:
+        example: USA
+        type: string
+      team2_id:
+        example: MEX
+        type: string
+    type: object
+  internal_api.FIFASimulateResponse:
+    properties:
+      penalties:
+        $ref: '#/definitions/internal_api.FIFAPenaltyResult'
+      period:
+        description: '"90" | "aet" | "pens"'
+        type: string
+      seed:
+        type: integer
+      team1_goals:
+        type: integer
+      team1_goals_aet:
+        type: integer
+      team1_id:
+        type: string
+      team1_name:
+        type: string
+      team2_goals:
+        type: integer
+      team2_goals_aet:
+        type: integer
+      team2_id:
+        type: string
+      team2_name:
+        type: string
+      winner:
+        description: empty = draw (group stage)
+        type: string
+    type: object
+  internal_api.FIFATeamOption:
+    properties:
+      elo:
+        type: integer
+      group:
+        type: string
+      host:
+        type: boolean
+      id:
+        type: string
+      name:
+        type: string
+    type: object
   internal_api.GameEvent:
     properties:
       away_score:
@@ -520,6 +608,45 @@ info:
   title: Sim1.0 API
   version: "1.0"
 paths:
+  /fifa/simulate:
+    post:
+      consumes:
+      - application/json
+      description: Uses a Poisson goals model with Dixon-Coles correction. ExtraTime=true
+        adds AET and penalties if the match is drawn.
+      parameters:
+      - description: Home/away team ids, optional seed, extra_time flag
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/internal_api.FIFASimulateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_api.FIFASimulateResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_api.ErrorResponse'
+      summary: Simulate a FIFA World Cup match
+      tags:
+      - fifa
+  /fifa/teams:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_api.FIFAListTeamsResponse'
+      summary: List all FIFA World Cup 2026 teams
+      tags:
+      - fifa
   /nba/seasons:
     get:
       description: Returns season identifiers that can be passed as the "season" parameter
