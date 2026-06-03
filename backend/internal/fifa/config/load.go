@@ -19,8 +19,18 @@ type Team struct {
 	Host  bool   `json:"host"`
 }
 
+// Match is one group-stage fixture.
+type Match struct {
+	Date     string `json:"date"`
+	Matchday int    `json:"matchday"`
+	Group    string `json:"group"`
+	Team1    string `json:"team1"`
+	Team2    string `json:"team2"`
+}
+
 type Bundle struct {
-	Teams map[string]Team
+	Teams   map[string]Team
+	Matches []Match
 }
 
 func Load() (*Bundle, error) {
@@ -52,7 +62,26 @@ func load(fsys fs.FS) (*Bundle, error) {
 		byID[t.ID] = t
 	}
 
-	return &Bundle{Teams: byID}, nil
+	schedData, err := fs.ReadFile(fsys, "wc2026_schedule.json")
+	if err != nil {
+		return nil, fmt.Errorf("read wc2026_schedule: %w", err)
+	}
+	var rawSched struct {
+		Matches []Match `json:"matches"`
+	}
+	if err := json.Unmarshal(schedData, &rawSched); err != nil {
+		return nil, fmt.Errorf("parse wc2026_schedule: %w", err)
+	}
+	for _, m := range rawSched.Matches {
+		if _, ok := byID[m.Team1]; !ok {
+			return nil, fmt.Errorf("schedule: unknown team %q", m.Team1)
+		}
+		if _, ok := byID[m.Team2]; !ok {
+			return nil, fmt.Errorf("schedule: unknown team %q", m.Team2)
+		}
+	}
+
+	return &Bundle{Teams: byID, Matches: rawSched.Matches}, nil
 }
 
 func (b *Bundle) Team(id string) (Team, error) {

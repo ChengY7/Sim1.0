@@ -55,6 +55,39 @@ const docTemplate = `{
                 }
             }
         },
+        "/fifa/simulate/group-stage": {
+            "post": {
+                "description": "Runs all 72 group-stage matches, returns standings for all 12 groups ordered by points. Top 2 per group advance; best 8 third-place teams also advance.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "fifa"
+                ],
+                "summary": "Simulate the FIFA World Cup 2026 group stage",
+                "parameters": [
+                    {
+                        "description": "Optional seed",
+                        "name": "body",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/internal_api.FIFASimulateGroupStageRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_api.FIFASimulateGroupStageResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/fifa/teams": {
             "get": {
                 "produces": [
@@ -438,6 +471,20 @@ const docTemplate = `{
                 }
             }
         },
+        "internal_api.FIFAGroupStanding": {
+            "type": "object",
+            "properties": {
+                "group": {
+                    "type": "string"
+                },
+                "teams": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/internal_api.FIFATeamStanding"
+                    }
+                }
+            }
+        },
         "internal_api.FIFAListTeamsResponse": {
             "type": "object",
             "properties": {
@@ -476,6 +523,29 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "team2_scored": {
+                    "type": "integer"
+                }
+            }
+        },
+        "internal_api.FIFASimulateGroupStageRequest": {
+            "type": "object",
+            "properties": {
+                "seed": {
+                    "type": "integer",
+                    "example": 42
+                }
+            }
+        },
+        "internal_api.FIFASimulateGroupStageResponse": {
+            "type": "object",
+            "properties": {
+                "groups": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/internal_api.FIFAGroupStanding"
+                    }
+                },
+                "seed": {
                     "type": "integer"
                 }
             }
@@ -566,6 +636,44 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
+                }
+            }
+        },
+        "internal_api.FIFATeamStanding": {
+            "type": "object",
+            "properties": {
+                "advance": {
+                    "type": "boolean"
+                },
+                "d": {
+                    "type": "integer"
+                },
+                "ga": {
+                    "type": "integer"
+                },
+                "gd": {
+                    "type": "integer"
+                },
+                "gf": {
+                    "type": "integer"
+                },
+                "l": {
+                    "type": "integer"
+                },
+                "mp": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pts": {
+                    "type": "integer"
+                },
+                "team_id": {
+                    "type": "string"
+                },
+                "w": {
+                    "type": "integer"
                 }
             }
         },

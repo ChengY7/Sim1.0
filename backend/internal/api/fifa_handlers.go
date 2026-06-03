@@ -94,3 +94,48 @@ func (h *Handlers) FIFASimulate(w http.ResponseWriter, r *http.Request) {
 
 	writeJSON(w, http.StatusOK, resp)
 }
+
+// FIFASimulateGroupStage godoc
+// @Summary      Simulate the FIFA World Cup 2026 group stage
+// @Description  Runs all 72 group-stage matches, returns standings for all 12 groups ordered by points. Top 2 per group advance; best 8 third-place teams also advance.
+// @Tags         fifa
+// @Accept       json
+// @Produce      json
+// @Param        body  body      FIFASimulateGroupStageRequest  false  "Optional seed"
+// @Success      200   {object}  FIFASimulateGroupStageResponse
+// @Router       /fifa/simulate/group-stage [post]
+func (h *Handlers) FIFASimulateGroupStage(w http.ResponseWriter, r *http.Request) {
+	r.Body = http.MaxBytesReader(w, r.Body, 4096)
+	var req FIFASimulateGroupStageRequest
+	_ = json.NewDecoder(r.Body).Decode(&req)
+
+	seed := time.Now().UnixNano()
+	if req.Seed != nil {
+		seed = *req.Seed
+	}
+
+	result := fifasim.SimulateGroupStage(h.fifaCfg, seed)
+
+	groups := make([]FIFAGroupStanding, len(result.Groups))
+	for i, g := range result.Groups {
+		teams := make([]FIFATeamStanding, len(g.Teams))
+		for j, t := range g.Teams {
+			teams[j] = FIFATeamStanding{
+				TeamID:  t.TeamID,
+				Name:    t.Name,
+				MP:      t.MP,
+				W:       t.W,
+				D:       t.D,
+				L:       t.L,
+				GF:      t.GF,
+				GA:      t.GA,
+				GD:      t.GD,
+				Pts:     t.Pts,
+				Advance: t.Advance,
+			}
+		}
+		groups[i] = FIFAGroupStanding{Group: g.Group, Teams: teams}
+	}
+
+	writeJSON(w, http.StatusOK, FIFASimulateGroupStageResponse{Seed: seed, Groups: groups})
+}

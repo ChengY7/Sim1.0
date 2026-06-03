@@ -86,6 +86,15 @@ definitions:
         example: unknown team id
         type: string
     type: object
+  internal_api.FIFAGroupStanding:
+    properties:
+      group:
+        type: string
+      teams:
+        items:
+          $ref: '#/definitions/internal_api.FIFATeamStanding'
+        type: array
+    type: object
   internal_api.FIFAListTeamsResponse:
     properties:
       teams:
@@ -111,6 +120,21 @@ definitions:
       team1_scored:
         type: integer
       team2_scored:
+        type: integer
+    type: object
+  internal_api.FIFASimulateGroupStageRequest:
+    properties:
+      seed:
+        example: 42
+        type: integer
+    type: object
+  internal_api.FIFASimulateGroupStageResponse:
+    properties:
+      groups:
+        items:
+          $ref: '#/definitions/internal_api.FIFAGroupStanding'
+        type: array
+      seed:
         type: integer
     type: object
   internal_api.FIFASimulateRequest:
@@ -173,6 +197,31 @@ definitions:
         type: string
       name:
         type: string
+    type: object
+  internal_api.FIFATeamStanding:
+    properties:
+      advance:
+        type: boolean
+      d:
+        type: integer
+      ga:
+        type: integer
+      gd:
+        type: integer
+      gf:
+        type: integer
+      l:
+        type: integer
+      mp:
+        type: integer
+      name:
+        type: string
+      pts:
+        type: integer
+      team_id:
+        type: string
+      w:
+        type: integer
     type: object
   internal_api.GameEvent:
     properties:
@@ -633,6 +682,29 @@ paths:
           schema:
             $ref: '#/definitions/internal_api.ErrorResponse'
       summary: Simulate a FIFA World Cup match
+      tags:
+      - fifa
+  /fifa/simulate/group-stage:
+    post:
+      consumes:
+      - application/json
+      description: Runs all 72 group-stage matches, returns standings for all 12 groups
+        ordered by points. Top 2 per group advance; best 8 third-place teams also
+        advance.
+      parameters:
+      - description: Optional seed
+        in: body
+        name: body
+        schema:
+          $ref: '#/definitions/internal_api.FIFASimulateGroupStageRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_api.FIFASimulateGroupStageResponse'
+      summary: Simulate the FIFA World Cup 2026 group stage
       tags:
       - fifa
   /fifa/teams:

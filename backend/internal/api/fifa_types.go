@@ -53,3 +53,35 @@ type FIFAPenaltyKick struct {
 	KickNo int    `json:"kick_no"`
 	Scored bool   `json:"scored"`
 }
+
+// FIFASimulateGroupStageRequest is the body for POST /fifa/simulate/group-stage.
+type FIFASimulateGroupStageRequest struct {
+	Seed *int64 `json:"seed,omitempty" example:"42"`
+}
+
+// FIFATeamStanding is one team's standing within a group.
+type FIFATeamStanding struct {
+	TeamID  string `json:"team_id"`
+	Name    string `json:"name"`
+	MP      int    `json:"mp"`
+	W       int    `json:"w"`
+	D       int    `json:"d"`
+	L       int    `json:"l"`
+	GF      int    `json:"gf"`
+	GA      int    `json:"ga"`
+	GD      int    `json:"gd"`
+	Pts     int    `json:"pts"`
+	Advance bool   `json:"advance"`
+}
+
+// FIFAGroupStanding holds the final standings for one group.
+type FIFAGroupStanding struct {
+	Group string             `json:"group"`
+	Teams []FIFATeamStanding `json:"teams"`
+}
+
+// FIFASimulateGroupStageResponse is returned after a full group-stage simulation.
+type FIFASimulateGroupStageResponse struct {
+	Seed   int64               `json:"seed"`
+	Groups []FIFAGroupStanding `json:"groups"`
+}
