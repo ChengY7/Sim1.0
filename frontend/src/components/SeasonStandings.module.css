@@ -2,20 +2,37 @@
   animation: fadeUp 0.3s ease;
 }
 
-/* ── Toolbar: conf tabs left, button right ── */
+/* ── Split layout ── */
+.splitLayout {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.leftPanel {
+  width: 460px;
+  flex-shrink: 0;
+  min-width: 0;
+}
+
+.rightPanel {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ── Toolbar: tabs on top row, button on bottom row ── */
 .toolbar {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 10px;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
 }
 
 .simGroup {
   display: flex;
   align-items: center;
   gap: 10px;
-  flex-shrink: 0;
+  justify-content: flex-end;
 }
 
 .actualBadge {
@@ -78,7 +95,7 @@
 }
 
 .confTab {
-  padding: 8px 24px;
+  padding: 6px 14px;
   background: transparent;
   border: none;
   border-radius: var(--r-sm);

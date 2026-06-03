@@ -1,29 +1,11 @@
 import styles from './PlayInBracket.module.css'
 import { espnLogo } from '../utils/espnLogo'
 
-export default function PlayInBracket({ eastSeeds, westSeeds, playin, onSimulate, loading, seasonSimulated }) {
+export default function PlayInBracket({ eastSeeds, westSeeds, playin, seasonSimulated }) {
   const simulated = playin !== null
 
   return (
     <div className={styles.wrap}>
-      <div className={styles.header}>
-        <span className={styles.note}>
-          {!seasonSimulated
-            ? 'Simulate a season to unlock the play-in bracket'
-            : simulated
-              ? 'Play-in complete — 7 and 8 seeds determined'
-              : 'Season simulated — ready to run play-in'}
-        </span>
-        <button
-          className={styles.btnSim}
-          disabled={!seasonSimulated || loading}
-          onClick={onSimulate}
-        >
-          {loading ? <span className={styles.spinner} /> : <TournamentIcon />}
-          <span>{loading ? 'Simulating…' : 'Simulate Play-In'}</span>
-        </button>
-      </div>
-
       <div className={styles.grid}>
         <ConferenceColumn
           conf="WEST"
@@ -185,10 +167,3 @@ function PlayoffSeedRow({ n, teamId }) {
   )
 }
 
-function TournamentIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" width="15" height="15">
-      <path d="M4 4h4v2H6v2h2v2H4V4zm0 10h4v6H4v-6zm6-10h4v6h-4V4zm0 8h4v8h-4v-8zm6-8h4v4h-4V4zm0 6h4v10h-4V10z" />
-    </svg>
-  )
-}

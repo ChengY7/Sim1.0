@@ -168,99 +168,80 @@ export default function SeasonStandings({ teams, season, actualStandings = [] })
 
       {error && <div className={styles.errorBox}>{error}</div>}
 
-      {/* Toolbar: conference tabs left, simulate button right */}
-      <div className={styles.toolbar}>
-        <div className={styles.confTabs}>
-          <button
-            className={`${styles.confTab} ${conf === 'east' ? styles.confTabActive : ''}`}
-            onClick={() => setConf('east')}
-          >
-            East
-          </button>
-          <button
-            className={`${styles.confTab} ${conf === 'west' ? styles.confTabActive : ''}`}
-            onClick={() => setConf('west')}
-          >
-            West
-          </button>
-          <button
-            className={`${styles.confTab} ${conf === 'cup' ? styles.confTabActive : ''}`}
-            onClick={() => setConf('cup')}
-          >
-            NBA Cup
-          </button>
-          <button
-            className={`${styles.confTab} ${conf === 'playin' ? styles.confTabActive : ''}`}
-            onClick={() => setConf('playin')}
-          >
-            Play-In
-          </button>
-          <button
-            className={`${styles.confTab} ${conf === 'lottery' ? styles.confTabActive : ''}`}
-            onClick={() => setConf('lottery')}
-          >
-            Draft Lottery
-          </button>
-          <button
-            className={`${styles.confTab} ${conf === 'playoffs' ? styles.confTabActive : ''}`}
-            onClick={() => setConf('playoffs')}
-          >
-            Playoffs
-          </button>
-        </div>
+      <div className={styles.splitLayout}>
 
-        <div className={styles.simGroup}>
-          {showActual && <span className={styles.actualBadge}>Actual</span>}
-          <button
-            className={styles.btnSim}
-            onClick={handleSimulate}
-            disabled={loading || teams.length === 0}
-          >
-            {loading ? <span className={styles.spinner} /> : <CalendarIcon />}
-            <span>{loading ? 'Simulating…' : 'Simulate Season'}</span>
-          </button>
-        </div>
-      </div>
+        {/* ── Left panel: tabs + content ── */}
+        <div className={styles.leftPanel}>
 
-      {/* NBA Cup bracket */}
-      {conf === 'cup' && <CupBracket cup={cup} />}
+          <div className={styles.toolbar}>
+            <div className={styles.confTabs}>
+              <button
+                className={`${styles.confTab} ${conf === 'east' ? styles.confTabActive : ''}`}
+                onClick={() => setConf('east')}
+              >East</button>
+              <button
+                className={`${styles.confTab} ${conf === 'west' ? styles.confTabActive : ''}`}
+                onClick={() => setConf('west')}
+              >West</button>
+              <button
+                className={`${styles.confTab} ${conf === 'cup' ? styles.confTabActive : ''}`}
+                onClick={() => setConf('cup')}
+              >NBA Cup</button>
+              <button
+                className={`${styles.confTab} ${conf === 'playin' ? styles.confTabActive : ''}`}
+                onClick={() => setConf('playin')}
+              >Play-In</button>
+              <button
+                className={`${styles.confTab} ${conf === 'lottery' ? styles.confTabActive : ''}`}
+                onClick={() => setConf('lottery')}
+              >Draft Lottery</button>
+            </div>
 
-      {/* Play-In bracket */}
-      {conf === 'playin' && (
-        <PlayInBracket
-          eastSeeds={eastSeeds}
-          westSeeds={westSeeds}
-          playin={playin}
-          onSimulate={handleSimulatePlayIn}
-          loading={playinLoading}
-          seasonSimulated={simulated}
-        />
-      )}
+            <div className={styles.simGroup}>
+              {showActual && <span className={styles.actualBadge}>Actual</span>}
+              <button
+                className={styles.btnSim}
+                onClick={handleSimulate}
+                disabled={loading || teams.length === 0}
+              >
+                {loading ? <span className={styles.spinner} /> : <CalendarIcon />}
+                <span>{loading ? 'Simulating…' : 'Simulate Season'}</span>
+              </button>
+              <button
+                className={styles.btnSim}
+                onClick={handleSimulatePlayIn}
+                disabled={!simulated || playinLoading}
+              >
+                {playinLoading ? <span className={styles.spinner} /> : <TournamentIcon />}
+                <span>{playinLoading ? 'Simulating…' : 'Simulate Play-In'}</span>
+              </button>
+            </div>
+          </div>
 
-      {/* Draft Lottery */}
-      {conf === 'lottery' && (
-        <DraftLottery
-          eastStandings={eastStandings}
-          westStandings={westStandings}
-          playin={playin}
-        />
-      )}
+          {/* NBA Cup bracket */}
+          {conf === 'cup' && <CupBracket cup={cup} />}
 
-      {/* Playoffs */}
-      {conf === 'playoffs' && (
-        <PlayoffBracket
-          eastSeeds={eastPlayoffSeeds}
-          westSeeds={westPlayoffSeeds}
-          playoffResult={playoff}
-          onSimulate={handleSimulatePlayoffs}
-          loading={playoffLoading}
-          seasonSimulated={simulated}
-          playinSimulated={playin !== null}
-        />
-      )}
+          {/* Play-In bracket */}
+          {conf === 'playin' && (
+            <PlayInBracket
+              eastSeeds={eastSeeds}
+              westSeeds={westSeeds}
+              playin={playin}
+              seasonSimulated={simulated}
+            />
+          )}
 
-      {/* Standings table */}
-      {conf !== 'cup' && conf !== 'playin' && conf !== 'lottery' && conf !== 'playoffs' && (
+          {/* Draft Lottery */}
+          {conf === 'lottery' && (
+            <DraftLottery
+              eastStandings={eastStandings}
+              westStandings={westStandings}
+              playin={playin}
+            />
+          )}
+
+          {/* Standings table */}
+          {conf !== 'cup' && conf !== 'playin' && conf !== 'lottery' && (
         <div className={styles.tableWrap}>
           <table className={styles.table}>
             <thead>
@@ -287,7 +268,24 @@ export default function SeasonStandings({ teams, season, actualStandings = [] })
             </tbody>
           </table>
         </div>
-      )}
+        )}
+
+        </div>{/* end leftPanel */}
+
+        {/* ── Right panel: playoff bracket always visible ── */}
+        <div className={styles.rightPanel}>
+          <PlayoffBracket
+            eastSeeds={eastPlayoffSeeds}
+            westSeeds={westPlayoffSeeds}
+            playoffResult={playoff}
+            onSimulate={handleSimulatePlayoffs}
+            loading={playoffLoading}
+            seasonSimulated={simulated}
+            playinSimulated={playin !== null}
+          />
+        </div>
+
+      </div>{/* end splitLayout */}
     </div>
   )
 }
@@ -344,6 +342,14 @@ function CalendarIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" width="15" height="15">
       <path d="M19 3h-1V1h-2v2H8V1H6v2H5C3.9 3 3 3.9 3 5v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z" />
+    </svg>
+  )
+}
+
+function TournamentIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" width="15" height="15">
+      <path d="M4 4h4v2H6v2h2v2H4V4zm0 10h4v6H4v-6zm6-10h4v6h-4V4zm0 8h4v8h-4v-8zm6-8h4v4h-4V4zm0 6h4v10h-4V10z" />
     </svg>
   )
 }

@@ -1,140 +1,229 @@
 import styles from './CupBracket.module.css'
 import { espnLogo } from '../utils/espnLogo'
 
+// Layout constants
+const SLOT    = 88     // px per QF slot → BH = 4 * SLOT = 352px
+const BH      = SLOT * 4
+const LABEL_H = 24     // column label height
+const CC      = 'rgba(255,255,255,0.12)'  // connector color
+
 export default function CupBracket({ cup }) {
   const sim = cup !== null
 
-  // Build a team-ID → seed-number (1–4) lookup from both conferences.
-  const seedMap = {}
+  // seed lookup: teamId → cup seed (1-4)
+  const seedOf = {}
   if (cup) {
-    cup.west.seeds.forEach((id, i) => { seedMap[id] = i + 1 })
-    cup.east.seeds.forEach((id, i) => { seedMap[id] = i + 1 })
+    cup.west.seeds.forEach((id, i) => { if (id) seedOf[id] = i + 1 })
+    cup.east.seeds.forEach((id, i) => { if (id) seedOf[id] = i + 1 })
   }
+
+  // SF spatial order: top = winner of QF[0], bottom = winner of QF[1]
+  const wSFTop = cup?.west.qf[0]?.winner
+  const wSFBot = cup?.west.qf[1]?.winner
+  const eSFTop = cup?.east.qf[0]?.winner
+  const eSFBot = cup?.east.qf[1]?.winner
+
+  // QF seed labels
+  const wSeeds = cup?.west.seeds ?? []
+  const eSeeds = cup?.east.seeds ?? []
 
   return (
     <div className={styles.bracketWrap}>
       <div className={styles.bracket}>
 
-        {/* ── West QF ── */}
-        <div className={styles.qfCol}>
-          <div className={styles.colLabel}>
-            <span className={styles.conf}>WEST</span>
-            <span>Quarterfinals</span>
+        {/* ── Quarterfinals (4 games) ── */}
+        <BCol label="Quarterfinals">
+          {/* West QF */}
+          <Slot h={SLOT}>
+            <GameCard
+              game={sim ? cup.west.qf[0] : null}
+              topId={wSeeds[0]} topSeed={seedOf[wSeeds[0]] ?? 1}
+              botId={wSeeds[3]} botSeed={seedOf[wSeeds[3]] ?? 4}
+              topPh="W · 1" botPh="W · 4"
+              sim={sim} confBadge="W"
+            />
+          </Slot>
+          <Slot h={SLOT}>
+            <GameCard
+              game={sim ? cup.west.qf[1] : null}
+              topId={wSeeds[1]} topSeed={seedOf[wSeeds[1]] ?? 2}
+              botId={wSeeds[2]} botSeed={seedOf[wSeeds[2]] ?? 3}
+              topPh="W · 2" botPh="W · 3"
+              sim={sim}
+            />
+          </Slot>
+          {/* Conference divider */}
+          <div className={styles.confDivider} />
+          {/* East QF */}
+          <Slot h={SLOT}>
+            <GameCard
+              game={sim ? cup.east.qf[0] : null}
+              topId={eSeeds[0]} topSeed={seedOf[eSeeds[0]] ?? 1}
+              botId={eSeeds[3]} botSeed={seedOf[eSeeds[3]] ?? 4}
+              topPh="E · 1" botPh="E · 4"
+              sim={sim} confBadge="E"
+            />
+          </Slot>
+          <Slot h={SLOT}>
+            <GameCard
+              game={sim ? cup.east.qf[1] : null}
+              topId={eSeeds[1]} topSeed={seedOf[eSeeds[1]] ?? 2}
+              botId={eSeeds[2]} botSeed={seedOf[eSeeds[2]] ?? 3}
+              topPh="E · 2" botPh="E · 3"
+              sim={sim}
+            />
+          </Slot>
+        </BCol>
+
+        <Conn12 />
+
+        {/* ── Semifinals (2 games) ── */}
+        <BCol label="Semifinals">
+          <Slot h={SLOT * 2}>
+            <GameCard
+              game={sim ? cup.west.sf : null}
+              topId={sim ? wSFTop : null} topSeed={seedOf[wSFTop]}
+              botId={sim ? wSFBot : null} botSeed={seedOf[wSFBot]}
+              topPh="W of QF1" botPh="W of QF2"
+              sim={sim} confBadge="W"
+            />
+          </Slot>
+          <Slot h={SLOT * 2}>
+            <GameCard
+              game={sim ? cup.east.sf : null}
+              topId={sim ? eSFTop : null} topSeed={seedOf[eSFTop]}
+              botId={sim ? eSFBot : null} botSeed={seedOf[eSFBot]}
+              topPh="W of QF1" botPh="W of QF2"
+              sim={sim} confBadge="E"
+            />
+          </Slot>
+        </BCol>
+
+        <Conn23 />
+
+        {/* ── Final ── */}
+        <BCol label="NBA Cup Final" gold>
+          <Slot h={BH}>
+            <GameCard
+              game={sim ? cup.final : null}
+              topId={sim ? cup.final.home : null} topSeed={seedOf[cup?.final?.home]}
+              botId={sim ? cup.final.away : null} botSeed={seedOf[cup?.final?.away]}
+              topPh="W Conf" botPh="E Conf"
+              sim={sim} isFinal
+            />
+          </Slot>
+        </BCol>
+
+        {/* ── Champion ── */}
+        {sim && cup?.final?.winner && (
+          <div className={styles.champion}>
+            <TrophyIcon />
+            <img
+              src={espnLogo(cup.final.winner)}
+              alt={cup.final.winner}
+              className={styles.champLogo}
+              onError={e => { e.currentTarget.style.opacity = '0' }}
+            />
+            <span>{cup.final.winner}</span>
           </div>
-          <GameCard game={cup?.west.qf[0]} tagA="1" tagB="4" sim={sim} seedMap={seedMap} />
-          <GameCard game={cup?.west.qf[1]} tagA="2" tagB="3" sim={sim} seedMap={seedMap} />
-        </div>
-
-        <div className={styles.connector}>
-          <div className={styles.connFork}>
-            <div className={styles.connTop} />
-            <div className={styles.connBot} />
-          </div>
-          <div className={styles.connH} />
-        </div>
-
-        {/* ── West SF ── */}
-        <div className={styles.sfCol}>
-          <div className={styles.colLabel}>Semifinal</div>
-          <div className={styles.sfGameWrap}>
-            <GameCard game={cup?.west.sf} sim={sim} seedMap={seedMap} />
-          </div>
-        </div>
-
-        <div className={styles.arrowCol}><span className={styles.arrow}>›</span></div>
-
-        {/* ── Cup Final ── */}
-        <div className={styles.finalCol}>
-          <div className={`${styles.colLabel} ${styles.finalColLabel}`}>NBA Cup Final</div>
-          <GameCard game={cup?.final} sim={sim} isFinal seedMap={seedMap} />
-          {sim && cup?.final?.winner && (
-            <div className={styles.champion}>
-              <TrophyIcon />
-              <span>{cup.final.winner}</span>
-            </div>
-          )}
-        </div>
-
-        <div className={styles.arrowCol}><span className={styles.arrow}>‹</span></div>
-
-        {/* ── East SF ── */}
-        <div className={styles.sfCol}>
-          <div className={styles.colLabel}>Semifinal</div>
-          <div className={styles.sfGameWrap}>
-            <GameCard game={cup?.east.sf} sim={sim} seedMap={seedMap} />
-          </div>
-        </div>
-
-        <div className={`${styles.connector} ${styles.connectorMirror}`}>
-          <div className={styles.connH} />
-          <div className={styles.connFork}>
-            <div className={styles.connTop} />
-            <div className={styles.connBot} />
-          </div>
-        </div>
-
-        {/* ── East QF ── */}
-        <div className={styles.qfCol}>
-          <div className={styles.colLabel}>
-            <span>Quarterfinals</span>
-            <span className={styles.conf}>EAST</span>
-          </div>
-          <GameCard game={cup?.east.qf[0]} tagA="1" tagB="4" sim={sim} seedMap={seedMap} />
-          <GameCard game={cup?.east.qf[1]} tagA="2" tagB="3" sim={sim} seedMap={seedMap} />
-        </div>
+        )}
 
       </div>
     </div>
   )
 }
 
-/* ── Game card ──────────────────────────────────────────────── */
+// ── Layout helpers ──────────────────────────────────────────────────────────
 
-function GameCard({ game, tagA, tagB, sim, isFinal, seedMap = {} }) {
-  const homeWon = sim && game?.winner === game?.home
-  const awayWon = sim && game?.winner === game?.away
+function BCol({ label, gold, children }) {
+  return (
+    <div className={styles.bcol}>
+      <div className={`${styles.colLabel} ${gold ? styles.colLabelGold : ''}`}>{label}</div>
+      <div style={{ height: BH }}>
+        {children}
+      </div>
+    </div>
+  )
+}
+
+function Slot({ h, children }) {
+  return (
+    <div style={{ height: h, display: 'flex', alignItems: 'center' }}>
+      {children}
+    </div>
+  )
+}
+
+// R1→R2 style: two forks connecting 4 QF slots to 2 SF slots
+function Conn12() {
+  return (
+    <div style={{ width: 12, height: BH + LABEL_H, display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
+      <div style={{ height: LABEL_H }} />
+      <div style={{ height: SLOT / 2 }} />
+      <Fork h={SLOT} />
+      <div style={{ height: SLOT }} />
+      <Fork h={SLOT} />
+      <div style={{ height: SLOT / 2 }} />
+    </div>
+  )
+}
+
+// R2→Final: single fork connecting 2 SF slots to 1 Final slot
+function Conn23() {
+  return (
+    <div style={{ width: 12, height: BH + LABEL_H, display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
+      <div style={{ height: LABEL_H }} />
+      <div style={{ height: SLOT }} />
+      <Fork h={SLOT * 2} />
+      <div style={{ height: SLOT }} />
+    </div>
+  )
+}
+
+function Fork({ h }) {
+  return (
+    <div style={{ height: h, display: 'flex', alignItems: 'stretch' }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <div style={{ flex: 1, borderRight: `1px solid ${CC}`, borderBottom: `1px solid ${CC}`, borderBottomRightRadius: 3 }} />
+        <div style={{ flex: 1, borderRight: `1px solid ${CC}`, borderTop:    `1px solid ${CC}`, borderTopRightRadius:    3 }} />
+      </div>
+      <div style={{ width: 6, height: 1, background: CC, alignSelf: 'center', flexShrink: 0 }} />
+    </div>
+  )
+}
+
+// ── Game card ───────────────────────────────────────────────────────────────
+
+function GameCard({ game, topId, topSeed, botId, botSeed, topPh, botPh, sim, isFinal, confBadge }) {
+  const topWon  = sim && !!game && game.winner === topId
+  const botWon  = sim && !!game && game.winner === botId
+  const topHome = sim && !!game && game.home === topId
+  const topScore = sim && game ? (topHome ? game.home_score : game.away_score) : null
+  const botScore = sim && game ? (topHome ? game.away_score : game.home_score) : null
 
   return (
     <div className={`${styles.card} ${isFinal ? styles.cardFinal : ''}`}>
-      {sim ? (
-        <>
-          <TeamRow teamId={game.home} score={game.home_score} won={homeWon} seed={seedMap[game.home]} />
-          <div className={styles.divider} />
-          <TeamRow teamId={game.away} score={game.away_score} won={awayWon} seed={seedMap[game.away]} />
-        </>
-      ) : (
-        <>
-          <EmptyRow seed={tagA} />
-          <div className={styles.divider} />
-          <EmptyRow seed={tagB} />
-        </>
-      )}
+      {confBadge && <div className={styles.confBadge}>{confBadge}</div>}
+      <TeamRow id={topId} seed={topSeed} ph={topPh} score={topScore} won={topWon} sim={sim} />
+      <div className={styles.divider} />
+      <TeamRow id={botId} seed={botSeed} ph={botPh} score={botScore} won={botWon} sim={sim} />
     </div>
   )
 }
 
-function TeamRow({ teamId, score, won, seed }) {
+function TeamRow({ id, seed, ph, score, won, sim }) {
+  const hasTeam = !!id
   return (
-    <div className={`${styles.teamRow} ${won ? styles.rowWon : styles.rowLost}`}>
-      <span className={styles.seedNum}>{seed}</span>
-      <img
-        src={espnLogo(teamId)}
-        alt={teamId}
-        className={styles.logo}
-        onError={e => { e.currentTarget.style.opacity = '0' }}
-      />
-      <span className={styles.abbr}>{teamId}</span>
-      <span className={styles.score}>{score}</span>
-    </div>
-  )
-}
-
-function EmptyRow({ seed }) {
-  return (
-    <div className={`${styles.teamRow} ${styles.rowEmpty}`}>
-      <div className={styles.logoGhost} />
-      <span className={styles.seedTag}>{seed ? `Seed ${seed}` : 'TBD'}</span>
-      <span className={styles.dash}>—</span>
+    <div className={`${styles.teamRow} ${!hasTeam ? styles.rowEmpty : sim && won ? styles.rowWon : sim ? styles.rowLost : ''}`}>
+      <span className={styles.seedNum}>{seed ?? ''}</span>
+      {hasTeam
+        ? <img src={espnLogo(id)} alt={id} className={styles.logo} onError={e => { e.currentTarget.style.opacity = '0' }} />
+        : <div className={styles.logoGhost} />
+      }
+      <span className={styles.abbr}>{hasTeam ? id : ph}</span>
+      <span className={`${styles.score} ${!sim || score == null ? styles.dash : ''}`}>
+        {sim && score != null ? score : '—'}
+      </span>
     </div>
   )
 }

@@ -2,43 +2,6 @@
   animation: fadeUp 0.3s ease;
 }
 
-/* ── Header: status note left, button right ── */
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.note {
-  font-size: 12px;
-  color: var(--text-muted);
-}
-
-.btnSim {
-  display: inline-flex; align-items: center; gap: 8px;
-  background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
-  border: none; border-radius: 50px;
-  color: #fff; cursor: pointer;
-  font-family: inherit; font-size: 13px; font-weight: 600; letter-spacing: 0.03em;
-  padding: 9px 22px;
-  box-shadow: 0 4px 20px rgba(99,102,241,0.35);
-  transition: transform 0.15s, box-shadow 0.15s;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-.btnSim:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 28px rgba(99,102,241,0.52); }
-.btnSim:active:not(:disabled) { transform: translateY(0); }
-.btnSim:disabled { opacity: 0.55; cursor: not-allowed; }
-
-.spinner {
-  width: 15px; height: 15px;
-  border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff;
-  border-radius: 50%;
-  animation: spin 0.7s linear infinite;
-}
-
 /* ── Two-column grid ── */
 .grid {
   display: grid;
