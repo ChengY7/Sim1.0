@@ -8,6 +8,7 @@ export default defineConfig({
     strictPort: false,
     proxy: {
       '/nba': 'http://localhost:8080',
+      '/fifa': 'http://localhost:8080',
     },
   },
 })
